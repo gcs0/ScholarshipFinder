@@ -1,0 +1,26 @@
+[project]
+name = "scholarship-finder"
+version = "0.1.0"
+description = "A Python-based project to support scholarship discovery and scholarship request submission."
+requires-python = ">=3.12"
+dependencies = [
+    "django>=5.0",
+]
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W"]
+
+[tool.pytest.ini_options]
+testpaths = ["scholarships"]
+pythonpath = ["."]
+
+[dependency-groups]
+dev = ["black", "ruff", "pytest", "pytest-cov"]
