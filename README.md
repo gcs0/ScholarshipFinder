@@ -67,6 +67,16 @@ Ignored by `.gitignore`:
 - test/coverage caches
 - editor/OS artifacts
 
+## API Reference
+
+| URL | Method | View | Arguments | Returns |
+|-----|--------|------|-----------|---------|
+| `/` | GET | `home` | — | Welcome page (HTML text) |
+| `/scholarships/` | GET | `scholarship_list` | — | List of scholarships (HTML text) |
+| `/scholarships/<int:pk>/` | GET | `scholarship_detail` | `pk`: int — scholarship ID | Scholarship details (HTML text) |
+| `/requests/new/` | GET | `request_form` | — | New request form page (HTML text) |
+| `/users/<int:pk>/` | GET | `user_detail` | `pk`: int — user ID | User profile page (HTML text) |
+
 ## Suggested Structure
 
 ```text
