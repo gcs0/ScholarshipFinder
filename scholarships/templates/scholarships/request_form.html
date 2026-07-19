@@ -1,0 +1,16 @@
+{% extends "scholarships/base.html" %}
+
+{% block title %}Submit Request — ScholarshipFinder{% endblock %}
+
+{% block content %}
+    <h1>Submit a Scholarship Request</h1>
+    <p>Use this form to request a scholarship that is not yet listed.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit Request</button>
+    </form>
+
+    <p><a href="{% url 'scholarship-list' %}">Cancel</a></p>
+{% endblock %}

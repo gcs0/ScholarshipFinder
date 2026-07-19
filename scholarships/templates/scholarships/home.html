@@ -1,0 +1,13 @@
+{% extends "scholarships/base.html" %}
+
+{% block title %}Welcome — ScholarshipFinder{% endblock %}
+
+{% block content %}
+    <h1>Welcome to ScholarshipFinder</h1>
+    <p>Discover scholarships and submit requests for ones not yet listed.</p>
+    <ul>
+        <li><a href="{% url 'scholarship-list' %}">Browse Scholarships</a></li>
+        <li><a href="{% url 'request-form' %}">Submit a Scholarship Request</a></li>
+        <li><a href="{% url 'user-create' %}">Create a Profile</a></li>
+    </ul>
+{% endblock %}

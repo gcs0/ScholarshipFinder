@@ -1,48 +1,74 @@
-from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+
+from .forms import ScholarshipFilterForm, ScholarshipRequestForm, UserForm
+from .models import Scholarship, User
 
 
 def home(request):
-    return HttpResponse("<h1>Welcome to ScholarshipFinder</h1>")
+    return render(request, "scholarships/home.html")
 
 
 def scholarship_list(request):
-    scholarships = [
-        "1. Tokyo STEM Scholarship — $5,000",
-        "2. Kyoto Arts Grant — $3,000",
-        "3. Osaka Engineering Fund — $10,000",
-    ]
-    html = "<h1>Available Scholarships</h1><ul>"
-    for s in scholarships:
-        html += f"<li>{s}</li>"
-    html += "</ul>"
-    return HttpResponse(html)
+    scholarships = Scholarship.objects.all()
+    filter_form = ScholarshipFilterForm(request.GET or None)
+
+    if filter_form.is_valid():
+        data = filter_form.cleaned_data
+        if data["education_level"]:
+            scholarships = scholarships.filter(education_level=data["education_level"])
+        if data["discipline"]:
+            scholarships = scholarships.filter(discipline=data["discipline"])
+        if data["prefecture"]:
+            scholarships = scholarships.filter(prefecture=data["prefecture"])
+
+    return render(
+        request,
+        "scholarships/scholarship_list.html",
+        {"scholarships": scholarships, "filter_form": filter_form},
+    )
 
 
 def scholarship_detail(request, pk):
-    return HttpResponse(
-        f"<h1>Scholarship #{pk}</h1>"
-        f"<p>Name: Placeholder Scholarship</p>"
-        f"<p>Provider: Placeholder Provider</p>"
-        f"<p>Award Amount: $5,000</p>"
-        f"<p>Deadline: 2026-12-31</p>"
+    scholarship = get_object_or_404(Scholarship, pk=pk)
+    return render(
+        request,
+        "scholarships/scholarship_detail.html",
+        {"scholarship": scholarship},
     )
 
 
 def request_form(request):
-    return HttpResponse(
-        "<h1>Submit a Scholarship Request</h1>"
-        "<p>Use this form to request a scholarship that is not yet listed.</p>"
-        "<p><em>(Form coming soon)</em></p>"
-    )
+    if request.method == "POST":
+        form = ScholarshipRequestForm(request.POST)
+        if form.is_valid():
+            request_obj = form.save()
+            return render(
+                request,
+                "scholarships/request_success.html",
+                {"request_obj": request_obj},
+            )
+    else:
+        form = ScholarshipRequestForm()
+
+    return render(request, "scholarships/request_form.html", {"form": form})
+
+
+def user_create(request):
+    if request.method == "POST":
+        form = UserForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            return redirect("user-detail", pk=user.pk)
+    else:
+        form = UserForm()
+
+    return render(request, "scholarships/user_form.html", {"form": form})
 
 
 def user_detail(request, pk):
-    return HttpResponse(
-        f"<h1>User #{pk}</h1>"
-        f"<p>Name: Placeholder User</p>"
-        f"<p>Email: user{pk}@example.com</p>"
-        f"<p>Education: Undergraduate</p>"
-        f"<p>Discipline: Computer Science</p>"
-        f"<p>Prefecture: Tokyo</p>"
+    user_obj = get_object_or_404(User, pk=pk)
+    return render(
+        request,
+        "scholarships/user_detail.html",
+        {"user_obj": user_obj},
     )
-

@@ -71,11 +71,12 @@ Ignored by `.gitignore`:
 
 | URL | Method | View | Arguments | Returns |
 |-----|--------|------|-----------|---------|
-| `/` | GET | `home` | — | Welcome page (HTML text) |
-| `/scholarships/` | GET | `scholarship_list` | — | List of scholarships (HTML text) |
-| `/scholarships/<int:pk>/` | GET | `scholarship_detail` | `pk`: int — scholarship ID | Scholarship details (HTML text) |
-| `/requests/new/` | GET | `request_form` | — | New request form page (HTML text) |
-| `/users/<int:pk>/` | GET | `user_detail` | `pk`: int — user ID | User profile page (HTML text) |
+| `/` | GET | `home` | — | Rendered home page (HTML) |
+| `/scholarships/` | GET | `scholarship_list` | Query: `education_level`, `discipline`, `prefecture` (optional) | Rendered scholarship list (HTML) |
+| `/scholarships/<int:pk>/` | GET | `scholarship_detail` | `pk`: int — scholarship ID | Rendered scholarship detail (HTML) |
+| `/requests/new/` | GET, POST | `request_form` | POST: `user`, `scholarship_name`, `provider`, `award_amount`, `notes` | GET: form page (HTML); POST: success page (HTML) |
+| `/users/new/` | GET, POST | `user_create` | POST: `name`, `email`, `education`, `discipline`, `prefecture` | GET: registration form (HTML); POST: redirect to user detail |
+| `/users/<int:pk>/` | GET | `user_detail` | `pk`: int — user ID | Rendered user profile (HTML) |
 
 ## Suggested Structure
 

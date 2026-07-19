@@ -1,0 +1,16 @@
+{% extends "scholarships/base.html" %}
+
+{% block title %}{{ scholarship.name }} — ScholarshipFinder{% endblock %}
+
+{% block content %}
+    <h1>{{ scholarship.name }}</h1>
+    <p><strong>Provider:</strong> {{ scholarship.provider }}</p>
+    <p><strong>Award Amount:</strong> {{ scholarship.award_amount }}</p>
+    <p><strong>Education Level:</strong> {{ scholarship.education_level }}</p>
+    <p><strong>Discipline:</strong> {{ scholarship.discipline }}</p>
+    <p><strong>Prefecture:</strong> {{ scholarship.prefecture }}</p>
+    <p><strong>Deadline:</strong> {{ scholarship.deadline }}</p>
+    <p><strong>Requirements:</strong> {{ scholarship.requirements }}</p>
+    <p><strong>Description:</strong> {{ scholarship.description }}</p>
+    <a href="{% url 'scholarship-list' %}">Back to list</a>
+{% endblock %}

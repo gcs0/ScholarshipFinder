@@ -1,0 +1,9 @@
+{% extends "scholarships/base.html" %}
+
+{% block title %}Request Submitted — ScholarshipFinder{% endblock %}
+
+{% block content %}
+    <h1>Request Submitted</h1>
+    <p>Your scholarship request for <strong>{{ request_obj.scholarship_name }}</strong> has been submitted.</p>
+    <p><a href="{% url 'scholarship-list' %}">Browse Scholarships</a></p>
+{% endblock %}

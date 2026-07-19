@@ -1,0 +1,26 @@
+{% extends "scholarships/base.html" %}
+
+{% block title %}Scholarships — ScholarshipFinder{% endblock %}
+
+{% block content %}
+    <h1>Available Scholarships</h1>
+
+    <form method="get">
+        {{ filter_form.as_p }}
+        <button type="submit">Filter</button>
+        <a href="{% url 'scholarship-list' %}">Clear</a>
+    </form>
+
+    {% if scholarships %}
+        <ul>
+            {% for s in scholarships %}
+                <li>
+                    <a href="{% url 'scholarship-detail' s.pk %}">{{ s.name }}</a>
+                    — {{ s.provider }} ({{ s.award_amount }})
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No scholarships found.</p>
+    {% endif %}
+{% endblock %}
