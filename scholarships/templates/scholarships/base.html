@@ -2,16 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ScholarshipFinder{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'scholarships/style.css' %}">
 </head>
 <body>
-    <nav>
-        <a href="{% url 'home' %}">Home</a> |
-        <a href="{% url 'scholarship-list' %}">Scholarships</a> |
-        <a href="{% url 'request-form' %}">New Request</a> |
-        <a href="{% url 'user-create' %}">Register</a>
-    </nav>
-    <hr>
-    {% block content %}{% endblock %}
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <header class="site-header">
+        <nav aria-label="Main navigation">
+            <ul class="nav-links">
+                {% url 'home' as home_url %}
+                {% url 'scholarship-list' as list_url %}
+                {% url 'request-form' as request_url %}
+                {% url 'user-create' as user_url %}
+                <li><a href="{{ home_url }}" {% if request.path == home_url %}aria-current="page"{% endif %}>Home</a></li>
+                <li><a href="{{ list_url }}" {% if request.path == list_url %}aria-current="page"{% endif %}>Scholarships</a></li>
+                <li><a href="{{ request_url }}" {% if request.path == request_url %}aria-current="page"{% endif %}>New Request</a></li>
+                <li><a href="{{ user_url }}" {% if request.path == user_url %}aria-current="page"{% endif %}>Register</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main id="main-content" class="container">
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="site-footer">
+        <p>&copy; ScholarshipFinder</p>
+    </footer>
 </body>
 </html>

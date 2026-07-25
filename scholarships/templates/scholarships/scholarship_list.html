@@ -5,18 +5,21 @@
 {% block content %}
     <h1>Available Scholarships</h1>
 
-    <form method="get">
-        {{ filter_form.as_p }}
-        <button type="submit">Filter</button>
-        <a href="{% url 'scholarship-list' %}">Clear</a>
-    </form>
+    <section aria-label="Filter scholarships">
+        <form method="get">
+            {{ filter_form.as_p }}
+            <button type="submit">Filter</button>
+            <a href="{% url 'scholarship-list' %}" class="button">Clear</a>
+        </form>
+    </section>
 
     {% if scholarships %}
-        <ul>
+        <ul class="scholarship-list">
             {% for s in scholarships %}
                 <li>
                     <a href="{% url 'scholarship-detail' s.pk %}">{{ s.name }}</a>
-                    — {{ s.provider }} ({{ s.award_amount }})
+                    <br>
+                    <span class="meta">{{ s.provider }} &mdash; {{ s.award_amount }}</span>
                 </li>
             {% endfor %}
         </ul>

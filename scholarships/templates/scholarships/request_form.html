@@ -3,14 +3,16 @@
 {% block title %}Submit Request — ScholarshipFinder{% endblock %}
 
 {% block content %}
-    <h1>Submit a Scholarship Request</h1>
-    <p>Use this form to request a scholarship that is not yet listed.</p>
+    <section aria-labelledby="form-heading">
+        <h1 id="form-heading">Submit a Scholarship Request</h1>
+        <p>Use this form to request a scholarship that is not yet listed.</p>
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Submit Request</button>
-    </form>
+        <form method="post" aria-describedby="form-description">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Submit Request</button>
+        </form>
 
-    <p><a href="{% url 'scholarship-list' %}">Cancel</a></p>
+        <p id="form-description"><a href="{% url 'scholarship-list' %}">Cancel</a></p>
+    </section>
 {% endblock %}

@@ -3,10 +3,18 @@
 {% block title %}{{ user_obj.name }} — ScholarshipFinder{% endblock %}
 
 {% block content %}
-    <h1>{{ user_obj.name }}</h1>
-    <p><strong>Email:</strong> {{ user_obj.email }}</p>
-    <p><strong>Education:</strong> {{ user_obj.education }}</p>
-    <p><strong>Discipline:</strong> {{ user_obj.discipline }}</p>
-    <p><strong>Prefecture:</strong> {{ user_obj.prefecture }}</p>
-    <a href="{% url 'home' %}">Home</a>
+    <section>
+        <h1>{{ user_obj.name }}</h1>
+        <dl class="detail-list">
+            <dt>Email</dt>
+            <dd>{{ user_obj.email }}</dd>
+            <dt>Education</dt>
+            <dd>{{ user_obj.education }}</dd>
+            <dt>Discipline</dt>
+            <dd>{{ user_obj.discipline }}</dd>
+            <dt>Prefecture</dt>
+            <dd>{{ user_obj.prefecture }}</dd>
+        </dl>
+        <a href="{% url 'home' %}" class="button">Home</a>
+    </section>
 {% endblock %}
