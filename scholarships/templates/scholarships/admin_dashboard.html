@@ -1,0 +1,64 @@
+{% extends "scholarships/base.html" %}
+
+{% block title %}Admin Dashboard — ScholarshipFinder{% endblock %}
+
+{% block content %}
+    <h1>Admin Dashboard</h1>
+    
+    <div class="admin-stats">
+        <div class="stat-card">
+            <h2>Pending Requests</h2>
+            <p class="stat-number">{{ pending_requests }}</p>
+        </div>
+        
+        <div class="stat-card">
+            <h2>Total Requests</h2>
+            <p class="stat-number">{{ total_requests }}</p>
+        </div>
+    </div>
+    
+    <div class="admin-actions">
+        <h2>Quick Actions</h2>
+        <div class="action-links">
+            <a href="{% url 'admin-requests' %}" class="button">Manage All Requests</a>
+            <a href="{% url 'reload-scholarships' %}" class="button">Reload CSV Data</a>
+            <a href="/admin/" class="button">Django Admin</a>
+        </div>
+    </div>
+    
+    <div class="recent-activity">
+        <h2>Recent Requests</h2>
+        {% if recent_requests %}
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Scholarship</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in recent_requests %}
+                        <tr>
+                            <td>{{ req.user.name }}</td>
+                            <td>{{ req.scholarship.scholarship_name }}</td>
+                            <td>
+                                <span class="status-badge status-{{ req.status }}">
+                                    {{ req.status|title }}
+                                </span>
+                            </td>
+                            <td>{{ req.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <a href="{% url 'admin-request-detail' req.id %}">Review</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No recent requests.</p>
+        {% endif %}
+    </div>
+{% endblock %}

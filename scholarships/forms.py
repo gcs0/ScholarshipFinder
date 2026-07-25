@@ -52,38 +52,63 @@ class RegistrationForm(UserCreationForm):
 class CustomLoginForm(AuthenticationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["username"].widget.attrs.update({"placeholder": "Username or Email"})
+        self.fields["username"].label = "Email"
+        self.fields["username"].widget.attrs.update({"placeholder": "Enter your email address", "autocomplete": "email"})
         self.fields["password"].widget.attrs.update({"placeholder": "Password"})
 
 
 class ScholarshipRequestForm(forms.ModelForm):
     class Meta:
         model = ScholarshipRequest
-        fields = ["scholarship_name", "provider", "award_amount", "notes"]
+        fields = ["scholarship"]
         widgets = {"notes": forms.Textarea(attrs={"rows": 4})}
-
-    def clean_award_amount(self):
-        amount = self.cleaned_data.get("award_amount")
-        if amount is not None and amount < 0:
-            raise forms.ValidationError("Award amount must be a positive number.")
-        return amount
-
-
-class ScholarshipFilterForm(forms.Form):
-    education_level = forms.ChoiceField(choices=[], required=False)
-    discipline = forms.ChoiceField(choices=[], required=False)
-    prefecture = forms.ChoiceField(choices=[], required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["education_level"].choices = self._get_choices("education_level")
-        self.fields["discipline"].choices = self._get_choices("discipline")
-        self.fields["prefecture"].choices = self._get_choices("prefecture")
+        self.fields["scholarship"].widget.attrs.update({"class": "form-select"})
 
-    def _get_choices(self, field_name):
-        values = (
-            Scholarship.objects.values_list(field_name, flat=True)
+
+class ScholarshipFilterForm(forms.Form):
+    section = forms.ChoiceField(choices=[], required=False, label="Scholarship Type")
+    scholarship_name = forms.CharField(required=False, label="Scholarship Name")
+    qualifier = forms.MultipleChoiceField(choices=[], required=False, label="School Year", widget=forms.CheckboxSelectMultiple)
+    designated_schools = forms.CharField(required=False, label="Designated Schools")
+    designated_fields = forms.CharField(required=False, label="Fields of Study")
+    plural_grants = forms.ChoiceField(choices=[], required=False, label="Multiple Grants")
+    contents = forms.CharField(required=False, label="Award Amount")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        section_choices = [("", "All")] + list(Scholarship.SECTION_CHOICES)
+        self.fields["section"].choices = section_choices
+        
+        self.fields["qualifier"].choices = self._get_qualifier_choices()
+        
+        plural_grants_values = (
+            Scholarship.objects.values_list("plural_grants", flat=True)
             .distinct()
-            .order_by(field_name)
+            .exclude(plural_grants="")
+            .order_by("plural_grants")
         )
-        return [("", "All")] + [(v, v) for v in values if v]
+        plural_grants_choices = [("", "All")] + [(v, v) for v in plural_grants_values]
+        self.fields["plural_grants"].choices = plural_grants_choices
+
+    def _get_qualifier_choices(self):
+        all_qualifiers = set()
+        for qualifier_str in Scholarship.objects.values_list("qualifier", flat=True).distinct():
+            if qualifier_str:
+                codes = [code.strip() for code in qualifier_str.split('\n') if code.strip()]
+                all_qualifiers.update(codes)
+        
+        try:
+            from .templatetags.scholarship_extras import QUALIFIER_MAPPING
+        except ImportError:
+            QUALIFIER_MAPPING = {}
+            
+        qualifier_choices = []
+        for code in sorted(all_qualifiers):
+            display_name = QUALIFIER_MAPPING.get(code, code)
+            qualifier_choices.append((code, f"{code} - {display_name}"))
+        
+        return qualifier_choices

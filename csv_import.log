@@ -1,0 +1,240 @@
+2026-07-25 16:07:01,231 - INFO - Starting CSV import from Scholarships.csv
+2026-07-25 16:07:01,231 - INFO - Overwrite mode: True
+2026-07-25 16:07:01,231 - WARNING - Could not clean old logs: module 'django.utils.timezone' has no attribute 'utc'
+2026-07-25 16:07:01,232 - INFO - Found header row: ['Section', 'No.', 'Foundation', 'Scholarship Name', 'Address / Contact', 'Inquiry', 'Application', 'Qualifier (School Year)', 'Age Limit', 'Designated Countries/Regions', 'Designated Schools in Japan', 'Designated Fields of Study', 'Plural Grants', 'Non-Student Visa OK', 'Additional Requirements', 'Contents (�1,000)', 'Duration', 'Application Period', 'Selection Method', 'Grantees', 'Grantees / Applications (Prev Year)']
+2026-07-25 16:07:01,238 - INFO - Created: Kitami City Scholarship for
+Foreign Students
+2026-07-25 16:07:01,247 - INFO - Created: Iwate Prefecture's
+Scholarship
+2026-07-25 16:07:01,254 - INFO - Created: Yamagata Prefectural
+Scholarship for Privately
+Financed Foreign Students
+2026-07-25 16:07:01,262 - INFO - Created: Ohtawara-city Foreign
+Student Scholarship
+2026-07-25 16:07:01,274 - INFO - Created: Foreign Student Scholarship
+2026-07-25 16:07:01,282 - INFO - Created: Financial Assistance Program
+for Foreign Students
+2026-07-25 16:07:01,289 - INFO - Created: Ishikawa Prefectural
+Scholarship for Privately
+Financed Foreign Students
+2026-07-25 16:07:01,297 - INFO - Created: Biwako Scholarship for
+Foreign Students
+2026-07-25 16:07:01,304 - INFO - Created: Kobe International Students
+Scholarship (Kobe/Sugawara
+Scholarship)
+2026-07-25 16:07:01,312 - INFO - Created: Foreign Student Scholarship
+2026-07-25 16:07:01,318 - INFO - Created: Scholarship for Foreign
+Students
+2026-07-25 16:07:01,326 - INFO - Created: Kurashiki City Financial
+Aid for Privately Financed
+Students
+2026-07-25 16:07:01,334 - INFO - Created: Scholarship Programs
+2026-07-25 16:07:01,342 - INFO - Created: Scholarship for new and
+transferring international
+students
+2026-07-25 16:07:01,349 - INFO - Created: Hiroshima Scholarship
+2026-07-25 16:07:01,356 - INFO - Created: Nankoku City Scholarship
+2026-07-25 16:07:01,363 - INFO - Created: Future Development
+Scholarship
+for International Students
+2026-07-25 16:07:01,370 - INFO - Created: Fukuoka City International
+Foundation Scholarship
+2026-07-25 16:07:01,378 - INFO - Created: Sekihara Dalian International
+Students' Scholarship
+2026-07-25 16:07:01,387 - INFO - Created: Kurume Scholarship for
+Foreign Students
+2026-07-25 16:07:01,396 - INFO - Created: Kurume Encouragement
+Subsidy for Foreign Students
+2026-07-25 16:07:01,404 - INFO - Created: Foreign Student Scholarship
+2026-07-25 16:07:01,414 - INFO - Created: The Scholarship for Privately
+Financed Foreign Students
+in Kagoshima
+2026-07-25 16:07:01,423 - INFO - Created: Satsumasendai City
+Scholarship
+for Foreign Students
+2026-07-25 16:07:01,432 - INFO - Created: Scholarships for Foreign
+Students
+2026-07-25 16:07:01,440 - INFO - Created: The Iwatani International
+Scholarships
+2026-07-25 16:07:01,450 - INFO - Created: Scholarship for Asian
+Students
+2026-07-25 16:07:01,460 - INFO - Created: Ando Kinen Syougakukin
+Scholarship
+2026-07-25 16:07:01,468 - INFO - Created: Young Steel Scholarship
+2026-07-25 16:07:01,477 - INFO - Created: Graduate Scholarship for
+Non-Japanese Women to
+Study in Japan
+2026-07-25 16:07:01,484 - INFO - Created: One Seed Scholarship
+2026-07-25 16:07:01,490 - INFO - Created: Semmoto Scholarship
+2026-07-25 16:07:01,498 - INFO - Created: International Student
+Scholarship
+2026-07-25 16:07:01,505 - INFO - Created: Scholarship for ASEAN
+Students
+2026-07-25 16:07:01,513 - INFO - Created: �Japanese Mothers for
+International Students�
+Movement Scholarship
+2026-07-25 16:07:01,520 - INFO - Created: Grant for International
+Students
+2026-07-25 16:07:01,527 - INFO - Created: NGK Scholarship
+2026-07-25 16:07:01,534 - INFO - Created: JEES International
+Scholarship(Study Support)
+2026-07-25 16:07:01,540 - INFO - Created: JEES Scholarship for the
+Japanese Language Study
+Support
+2026-07-25 16:07:01,547 - INFO - Created: JEES Scholarship for the
+Promotion of Japanese
+Language Learning
+2026-07-25 16:07:01,585 - INFO - Created: International Student
+Scholarship
+(JEES Sponsor-Crowned
+Scholarship)
+2026-07-25 16:07:01,599 - INFO - Created: Seiho Scholarship
+(JEES Sponsor-Crowned
+Scholarship)
+2026-07-25 16:07:01,626 - INFO - Created: IUCHI Scholarship for
+Myanmarese Students
+(JEES Sponsor-Crowned
+Scholarship)
+2026-07-25 16:07:01,633 - INFO - Created: Sumitomo Corporation Oman
+International Scholarship
+Program
+(JEES Sponsor-Crowned
+Scholarship)
+2026-07-25 16:07:01,640 - INFO - Created: TAISEI Scholarship for
+International Students
+(JEES Sponsor-Crowned
+Scholarship)
+2026-07-25 16:07:01,691 - INFO - Created: (Application in Japan)
+2026-07-25 16:07:01,699 - INFO - Created: FRF Scholarship for Studying
+in Japan for Vietnamese
+2026-07-25 16:07:01,706 - INFO - Created: Scholarship for Foreign
+Students in Japan
+2026-07-25 16:07:01,713 - INFO - Created: JAPAN STUDY SUPPORT
+Scholarships
+2026-07-25 16:07:01,719 - INFO - Created: Scholarship for Foreign
+Students
+2026-07-25 16:07:01,727 - INFO - Created: Mitani Scholarship
+2026-07-25 16:07:01,735 - INFO - Created: Mitsubishi UFJ Foundation
+Scholarship
+2026-07-25 16:07:01,741 - INFO - Created: The Mitsubishi UFJ Trust
+Scholarship Foundation
+Scholarship
+2026-07-25 16:07:01,750 - INFO - Created: Moriya Scholarship
+2026-07-25 16:07:01,757 - INFO - Created: Scholarship
+2026-07-25 16:07:01,764 - INFO - Created: Rohm Music Foundation
+Scholarship
+2026-07-25 16:07:01,771 - INFO - Created: Aichi Scholarship Program
+2026-07-25 16:07:01,779 - INFO - Created: INPEX Scholarship
+2026-07-25 16:07:01,785 - INFO - Updated: Young Steel Scholarship
+2026-07-25 16:07:01,794 - INFO - Created: Foundation
+Scholarship(Inbound)
+(JEES Sponsor-Crowned
+Scholarship)
+2026-07-25 16:07:01,801 - INFO - Created: Sumitomo Corporation
+International Student
+Scholarship
+(JEES Sponsor-Crowned
+Scholarship)
+2026-07-25 16:07:01,809 - INFO - Updated: FRF Scholarship for Studying
+in Japan for Vietnamese
+2026-07-25 16:07:01,816 - INFO - Created: Toshizo Watanabe Study
+Abroad Scholarship
+2026-07-25 16:07:01,823 - INFO - Created: YKK Leaders 21
+2026-07-25 16:07:01,843 - INFO - ==================================================
+2026-07-25 16:07:01,843 - INFO - CSV Import Summary:
+2026-07-25 16:07:01,843 - INFO - Total rows processed: 156
+2026-07-25 16:07:01,843 - INFO - Successfully imported: 76
+2026-07-25 16:07:01,843 - INFO - Created: 74
+2026-07-25 16:07:01,843 - INFO - Updated: 2
+2026-07-25 16:07:01,843 - INFO - Skipped: 80
+2026-07-25 16:07:01,843 - INFO - Errors: 0
+2026-07-25 16:07:01,843 - INFO - ==================================================
+2026-07-25 16:24:35,497 - INFO - Starting CSV import from Scholarships.csv
+2026-07-25 16:24:35,497 - INFO - Overwrite mode: True
+2026-07-25 16:24:35,497 - WARNING - Could not clean old logs: module 'django.utils.timezone' has no attribute 'utc'
+2026-07-25 16:24:35,499 - INFO - Found header row: 21 columns
+2026-07-25 16:24:35,505 - INFO - Updated: Kitami City Scholarship for Foreign Students
+2026-07-25 16:24:35,511 - INFO - Updated: Iwate Prefecture's Scholarship
+2026-07-25 16:24:35,520 - INFO - Updated: Yamagata Prefectural Scholarship for Privately Fin
+2026-07-25 16:24:35,527 - INFO - Updated: Ohtawara-city Foreign Student Scholarship
+2026-07-25 16:24:35,535 - INFO - Updated: Foreign Student Scholarship
+2026-07-25 16:24:35,541 - INFO - Updated: Financial Assistance Program for Foreign Students
+2026-07-25 16:24:35,549 - INFO - Updated: Ishikawa Prefectural Scholarship for Privately Fin
+2026-07-25 16:24:35,555 - INFO - Updated: Biwako Scholarship for Foreign Students
+2026-07-25 16:24:35,562 - INFO - Updated: Kobe International Students Scholarship (Kobe/Suga
+2026-07-25 16:24:35,568 - INFO - Updated: Foreign Student Scholarship
+2026-07-25 16:24:35,575 - INFO - Updated: Scholarship for Foreign Students
+2026-07-25 16:24:35,580 - INFO - Updated: Kurashiki City Financial Aid for Privately Finance
+2026-07-25 16:24:35,588 - INFO - Updated: Scholarship Programs
+2026-07-25 16:24:35,594 - INFO - Updated: Scholarship for new and transferring international
+2026-07-25 16:24:35,601 - INFO - Updated: Hiroshima Scholarship
+2026-07-25 16:24:35,607 - INFO - Updated: Nankoku City Scholarship
+2026-07-25 16:24:35,614 - INFO - Updated: Future Development Scholarship for International S
+2026-07-25 16:24:35,622 - INFO - Updated: Fukuoka City International Foundation Scholarship
+2026-07-25 16:24:35,628 - INFO - Updated: Sekihara Dalian International Students' Scholarshi
+2026-07-25 16:24:35,634 - INFO - Updated: Kurume Scholarship for Foreign Students
+2026-07-25 16:24:35,641 - INFO - Updated: Kurume Encouragement Subsidy for Foreign Students
+2026-07-25 16:24:35,647 - INFO - Updated: Foreign Student Scholarship
+2026-07-25 16:24:35,654 - INFO - Updated: The Scholarship for Privately Financed Foreign Stu
+2026-07-25 16:24:35,660 - INFO - Updated: Satsumasendai City Scholarship for Foreign Student
+2026-07-25 16:24:35,667 - INFO - Updated: Scholarships for Foreign Students
+2026-07-25 16:24:35,674 - INFO - Updated: The Iwatani International Scholarships
+2026-07-25 16:24:35,680 - INFO - Updated: Scholarship for Asian Students
+2026-07-25 16:24:35,687 - INFO - Updated: Ando Kinen Syougakukin Scholarship
+2026-07-25 16:24:35,693 - INFO - Updated: Young Steel Scholarship
+2026-07-25 16:24:35,700 - INFO - Updated: Graduate Scholarship for Non-Japanese Women to Stu
+2026-07-25 16:24:35,707 - INFO - Updated: One Seed Scholarship
+2026-07-25 16:24:35,713 - INFO - Updated: Semmoto Scholarship
+2026-07-25 16:24:35,721 - INFO - Updated: International Student Scholarship
+2026-07-25 16:24:35,727 - INFO - Updated: Scholarship for ASEAN Students
+2026-07-25 16:24:35,734 - INFO - Updated: “Japanese Mothers for International Students” Move
+2026-07-25 16:24:35,741 - INFO - Updated: Grant for International Students
+2026-07-25 16:24:35,750 - INFO - Updated: NGK Scholarship
+2026-07-25 16:24:35,757 - INFO - Updated: JEES International Scholarship(Study Support)
+2026-07-25 16:24:35,765 - INFO - Updated: JEES Scholarship for the Japanese Language Study S
+2026-07-25 16:24:35,773 - INFO - Updated: JEES Scholarship for the Promotion of Japanese Lan
+2026-07-25 16:24:35,780 - INFO - Updated: JEES・Jinnai International Student Scholarship (JEE
+2026-07-25 16:24:35,787 - INFO - Updated: JEES・Tohkoh Jushi International Student Scholarshi
+2026-07-25 16:24:35,794 - INFO - Updated: International Student Scholarship (JEES Sponsor-Cr
+2026-07-25 16:24:35,800 - INFO - Updated: JEES・Makita-Jinʼichi International Scholarship Fou
+2026-07-25 16:24:35,808 - INFO - Updated: Seiho Scholarship (JEES Sponsor-Crowned Scholarshi
+2026-07-25 16:24:35,815 - INFO - Updated: JEES・MHI Mirai Scholarship (JEES Sponsor-Crowned S
+2026-07-25 16:24:35,822 - INFO - Updated: JEES・T.Banaji Indian Students Scholarship (JEES Sp
+2026-07-25 16:24:35,828 - INFO - Updated: IUCHI Scholarship for Myanmarese Students (JEES Sp
+2026-07-25 16:24:35,835 - INFO - Updated: Sumitomo Corporation Oman International Scholarshi
+2026-07-25 16:24:35,841 - INFO - Updated: TAISEI Scholarship for International Students (JEE
+2026-07-25 16:24:35,848 - INFO - Updated: JEES・JX Nippon International Scholarship (Indonesi
+2026-07-25 16:24:35,855 - INFO - Updated: JEES・Aoki Corporation International Scholarship (J
+2026-07-25 16:24:35,862 - INFO - Updated: JEES・Jinnai International Understanding Scholarshi
+2026-07-25 16:24:35,870 - INFO - Updated: JEES・Johnson Controls Scholarship (JEES Sponsor-Cr
+2026-07-25 16:24:35,878 - INFO - Updated: JEES・Mitsubishi Tanabe Pharma Corporation Scholash
+2026-07-25 16:24:35,886 - INFO - Updated: (Application in Japan)
+2026-07-25 16:24:35,898 - INFO - Updated: FRF Scholarship for Studying in Japan for Vietname
+2026-07-25 16:24:35,909 - INFO - Updated: Scholarship for Foreign Students in Japan
+2026-07-25 16:24:35,921 - INFO - Updated: JAPAN STUDY SUPPORT Scholarships
+2026-07-25 16:24:35,936 - INFO - Updated: Scholarship for Foreign Students
+2026-07-25 16:24:35,943 - INFO - Updated: Mitani Scholarship
+2026-07-25 16:24:35,950 - INFO - Updated: Mitsubishi UFJ Foundation Scholarship
+2026-07-25 16:24:35,956 - INFO - Updated: The Mitsubishi UFJ Trust Scholarship Foundation Sc
+2026-07-25 16:24:35,962 - INFO - Updated: Moriya Scholarship
+2026-07-25 16:24:35,969 - INFO - Updated: Scholarship
+2026-07-25 16:24:35,975 - INFO - Updated: Rohm Music Foundation Scholarship
+2026-07-25 16:24:35,982 - INFO - Updated: Aichi Scholarship Program
+2026-07-25 16:24:35,988 - INFO - Updated: INPEX Scholarship
+2026-07-25 16:24:35,997 - INFO - Updated: Young Steel Scholarship
+2026-07-25 16:24:36,003 - INFO - Updated: Foundation Scholarship(Inbound) (JEES Sponsor-Crow
+2026-07-25 16:24:36,010 - INFO - Updated: Sumitomo Corporation International Student Scholar
+2026-07-25 16:24:36,017 - INFO - Updated: FRF Scholarship for Studying in Japan for Vietname
+2026-07-25 16:24:36,024 - INFO - Updated: Toshizo Watanabe Study Abroad Scholarship
+2026-07-25 16:24:36,030 - INFO - Updated: YKK Leaders 21
+2026-07-25 16:24:36,038 - INFO - Updated: Reservation Program for Monbukagakusho Honors Scho
+2026-07-25 16:24:36,047 - INFO - Updated: Student Exchange Support Program （Scholarship for 
+2026-07-25 16:24:36,053 - INFO - ==================================================
+2026-07-25 16:24:36,053 - INFO - CSV Import Summary:
+2026-07-25 16:24:36,053 - INFO - Total rows processed: 156
+2026-07-25 16:24:36,053 - INFO - Successfully imported: 76
+2026-07-25 16:24:36,053 - INFO - Created: 0
+2026-07-25 16:24:36,053 - INFO - Updated: 76
+2026-07-25 16:24:36,053 - INFO - Skipped: 80
+2026-07-25 16:24:36,053 - INFO - Errors: 0
+2026-07-25 16:24:36,053 - INFO - ==================================================

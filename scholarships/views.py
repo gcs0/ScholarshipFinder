@@ -1,9 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.views import PasswordChangeDoneView, PasswordChangeView
 from django.shortcuts import redirect, render
+from django.utils import timezone
+from django.core.management import call_command
 
 from .forms import (
     CustomLoginForm,
@@ -24,12 +26,49 @@ def scholarship_list(request):
 
     if filter_form.is_valid():
         data = filter_form.cleaned_data
-        if data["education_level"]:
-            scholarships = scholarships.filter(education_level=data["education_level"])
-        if data["discipline"]:
-            scholarships = scholarships.filter(discipline=data["discipline"])
-        if data["prefecture"]:
-            scholarships = scholarships.filter(prefecture=data["prefecture"])
+        
+        # Filter by section
+        if data["section"]:
+            scholarships = scholarships.filter(section=data["section"])
+        
+        # Filter by scholarship name (partial match)
+        if data["scholarship_name"]:
+            scholarships = scholarships.filter(
+                scholarship_name__icontains=data["scholarship_name"]
+            )
+        
+        # Filter by qualifier (multiple choices)
+        if data["qualifier"]:
+            qualifier_filters = []
+            for code in data["qualifier"]:
+                qualifier_filters.append(qualifier__icontains=code)
+            
+            from django.db.models import Q
+            qualifier_q = Q()
+            for filter_q in qualifier_filters:
+                qualifier_q |= Q(**{filter_q: True})
+            
+            scholarships = scholarships.filter(qualifier_q)
+        
+        # Filter by designated schools (partial match)
+        if data["designated_schools"]:
+            scholarships = scholarships.filter(
+                designated_schools__icontains=data["designated_schools"]
+            )
+        
+        # Filter by designated fields (partial match)
+        if data["designated_fields"]:
+            scholarships = scholarships.filter(
+                designated_fields__icontains=data["designated_fields"]
+            )
+        
+        # Filter by plural grants
+        if data["plural_grants"]:
+            scholarships = scholarships.filter(plural_grants=data["plural_grants"])
+        
+        # Filter by contents (award amount)
+        if data["contents"]:
+            scholarships = scholarships.filter(contents__icontains=data["contents"])
 
     return render(
         request,
@@ -48,19 +87,37 @@ def scholarship_detail(request, pk):
 
 
 @login_required
-def request_form(request):
+def request_form(request, scholarship_id):
+    scholarship = Scholarship.objects.get(pk=scholarship_id)
+    
+    # Check if user already has a pending request for this scholarship
+    existing_request = ScholarshipRequest.objects.filter(
+        user=request.user,
+        scholarship=scholarship,
+        status='pending'
+    ).first()
+    
+    if existing_request:
+        messages.warning(request, "You already have a pending request for this scholarship.")
+        return redirect("scholarship-detail", pk=scholarship_id)
+    
     if request.method == "POST":
         form = ScholarshipRequestForm(request.POST)
         if form.is_valid():
             request_obj = form.save(commit=False)
             request_obj.user = request.user
+            request_obj.scholarship = scholarship
+            request_obj.status = 'pending'
             request_obj.save()
-            messages.success(request, "Your scholarship request has been submitted!")
+            messages.success(request, "Your scholarship request has been submitted and is pending admin approval!")
             return redirect("profile")
     else:
-        form = ScholarshipRequestForm()
+        form = ScholarshipRequestForm(initial={'scholarship': scholarship})
 
-    return render(request, "scholarships/request_form.html", {"form": form})
+    return render(request, "scholarships/request_form.html", {
+        "form": form,
+        "scholarship": scholarship
+    })
 
 
 def register(request):
@@ -110,12 +167,81 @@ def user_logout(request):
 
 @login_required
 def profile(request):
-    user_requests = ScholarshipRequest.objects.filter(user=request.user)
+    user_requests = ScholarshipRequest.objects.filter(user=request.user).order_by('-created_at')
     return render(
         request,
         "scholarships/profile.html",
         {"user_requests": user_requests},
     )
+
+
+# Admin views
+@user_passes_test(lambda u: u.is_superuser)
+def admin_dashboard(request):
+    pending_requests = ScholarshipRequest.objects.filter(status='pending').count()
+    total_requests = ScholarshipRequest.objects.count()
+    recent_requests = ScholarshipRequest.objects.order_by('-created_at')[:10]
+    
+    return render(request, "scholarships/admin_dashboard.html", {
+        'pending_requests': pending_requests,
+        'total_requests': total_requests,
+        'recent_requests': recent_requests
+    })
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def admin_requests(request):
+    status_filter = request.GET.get('status', 'all')
+    requests = ScholarshipRequest.objects.all()
+    
+    if status_filter != 'all':
+        requests = requests.filter(status=status_filter)
+    
+    requests = requests.order_by('-created_at')
+    
+    return render(request, "scholarships/admin_requests.html", {
+        'requests': requests,
+        'status_filter': status_filter
+    })
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def admin_request_detail(request, pk):
+    request_obj = ScholarshipRequest.objects.get(pk=pk)
+    
+    if request.method == "POST":
+        action = request.POST.get('action')
+        admin_notes = request.POST.get('admin_notes', '')
+        
+        if action in ['approve', 'reject']:
+            request_obj.status = 'approved' if action == 'approve' else 'rejected'
+            request_obj.admin_notes = admin_notes
+            request_obj.reviewed_by = request.user
+            request_obj.reviewed_date = timezone.now()
+            request_obj.save()
+            
+            action_text = "approved" if action == 'approve' else "rejected"
+            messages.success(request, f"Request {action_text} successfully.")
+            return redirect("admin-requests")
+    
+    return render(request, "scholarships/admin_request_detail.html", {
+        'request_obj': request_obj
+    })
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def reload_scholarships(request):
+    """Admin endpoint to reload CSV data"""
+    if request.method == "POST":
+        try:
+            call_command('import_scholarships', '--overwrite')
+            messages.success(request, "Scholarships reloaded successfully from CSV!")
+        except Exception as e:
+            messages.error(request, f"Error reloading scholarships: {str(e)}")
+        
+        return redirect("admin-dashboard")
+    
+    return render(request, "scholarships/reload_scholarships.html")
 
 
 class CustomPasswordChangeView(PasswordChangeView):

@@ -5,6 +5,9 @@
     --color-border: #dddddd;
     --color-focus: #000000;
     --color-error: #b30000;
+    --color-success: #28a745;
+    --color-warning: #ffc107;
+    --color-info: #17a2b8;
     --spacing-unit: 1rem;
     --max-width: 60rem;
 }
@@ -118,6 +121,46 @@ button:hover,
     color: var(--color-bg);
 }
 
+.button.small {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.button.approve {
+    background-color: var(--color-success);
+    border-color: var(--color-success);
+    color: white;
+}
+
+.button.approve:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+.button.reject {
+    background-color: var(--color-error);
+    border-color: var(--color-error);
+    color: white;
+}
+
+.button.reject:hover {
+    background-color: #922b21;
+    border-color: #821f18;
+}
+
+.button.primary-action {
+    background-color: var(--color-info);
+    border-color: var(--color-info);
+    color: white;
+    padding: 0.75rem 2rem;
+    font-size: 1.125rem;
+}
+
+.button.primary-action:hover {
+    background-color: #138496;
+    border-color: #117a8b;
+}
+
 form p {
     margin: 0 0 1rem;
 }
@@ -154,30 +197,180 @@ form textarea:focus {
     font-size: 0.875rem;
 }
 
-.scholarship-list {
-    list-style: none;
-    margin: 1.5rem 0 0;
-    padding: 0;
-    display: grid;
-    gap: 1rem;
+/* Filter Toggle Button */
+.filter-toggle {
+    margin-bottom: 1rem;
+    width: auto;
+    padding: 0.5rem 1.5rem;
+    background: var(--color-text);
+    color: var(--color-bg);
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--color-text);
+    font-size: 1rem;
+}
+.filter-toggle:hover {
+    opacity: 0.85;
 }
 
-.scholarship-list li {
-    border: 1px solid var(--color-border);
+#filter-panel {
+    margin-bottom: 1.5rem;
     padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: #fafafa;
 }
 
-.scholarship-list li:hover {
-    background: #f9f9f9;
+/* Compact Filter Grid */
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
 }
 
-.scholarship-list a {
+.filter-field label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 0.15rem;
+}
+
+.filter-field input,
+.filter-field select {
+    width: 100%;
+    max-width: 100%;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.9rem;
+    border: 1px solid var(--color-border);
+    font-family: inherit;
+}
+
+.filter-field input:focus,
+.filter-field select:focus {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 1px;
+}
+
+.qualifier-details {
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.qualifier-details summary {
+    cursor: pointer;
+    font-weight: 600;
+    padding: 0.25rem 0;
+}
+
+.checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    padding: 0.5rem;
+}
+
+.checkbox-group label {
+    font-weight: 400;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.filter-actions button,
+.filter-actions .button {
+    font-size: 0.9rem;
+    padding: 0.35rem 1rem;
+}
+
+/* Scholarship Table */
+.table-wrapper {
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+
+.scholarship-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.scholarship-table th {
+    text-align: left;
+    padding: 0.6rem 0.5rem;
+    font-weight: 700;
+    background: #f2f2f2;
+    border-bottom: 2px solid var(--color-text);
+    white-space: nowrap;
+}
+
+.scholarship-table td {
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+    word-break: break-word;
+}
+
+.scholarship-table tbody tr:hover {
+    background: #fafafa;
+}
+
+.scholarship-table a {
     font-weight: 600;
     text-decoration: none;
 }
 
-.scholarship-list a:hover {
+.scholarship-table a:hover {
     text-decoration: underline;
+}
+
+.result-count {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+.section-badge {
+    display: inline-block;
+    background-color: var(--color-info);
+    color: white;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Detail View Styles */
+.scholarship-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.detail-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.detail-section:last-child {
+    border-bottom: none;
+}
+
+.detail-section h2 {
+    font-size: 1.125rem;
+    color: var(--color-text-muted);
+    margin-bottom: 1rem;
 }
 
 .detail-list {
@@ -196,6 +389,338 @@ form textarea:focus {
     margin: 0;
 }
 
+.detail-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+}
+
+/* Admin Styles */
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    border: 1px solid var(--color-border);
+    padding: 1.5rem;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.stat-card h2 {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.admin-actions,
+.recent-activity {
+    margin-bottom: 2rem;
+}
+
+.admin-actions h2,
+.recent-activity h2 {
+    margin-bottom: 1rem;
+}
+
+.action-links {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.admin-table th,
+.admin-table td {
+    text-align: left;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.admin-table th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+.admin-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-pending {
+    background-color: var(--color-warning);
+    color: #000;
+}
+
+.status-approved {
+    background-color: var(--color-success);
+    color: white;
+}
+
+.status-rejected {
+    background-color: var(--color-error);
+    color: white;
+}
+
+/* Filter Controls */
+.filter-controls {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.filter-form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-form label {
+    margin-bottom: 0;
+    margin-right: 0.5rem;
+}
+
+.filter-form select {
+    max-width: 150px;
+    margin-right: 0.5rem;
+}
+
+/* Request Review Styles */
+.request-review-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.request-review-content {
+    display: grid;
+    gap: 2rem;
+}
+
+.review-actions {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 4px;
+}
+
+.review-actions h2,
+.review-result h2 {
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/* Request Form Styles */
+.scholarship-preview {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 4px;
+    margin-bottom: 2rem;
+}
+
+.scholarship-preview h2 {
+    margin-bottom: 0.75rem;
+}
+
+.scholarship-preview p {
+    margin: 0.25rem 0;
+}
+
+.request-form-container {
+    max-width: 40rem;
+}
+
+.user-info-summary {
+    background-color: #e9ecef;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+}
+
+.user-info-summary h3 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+}
+
+.user-info-summary p {
+    margin: 0.25rem 0;
+}
+
+.form-field {
+    margin-bottom: 1rem;
+}
+
+.form-field input[readonly] {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.request-info {
+    margin-top: 2rem;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+}
+
+.request-info h3 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+}
+
+.request-info ol {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.request-info li {
+    margin-bottom: 0.5rem;
+}
+
+/* Profile Styles */
+.request-list {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.request-item {
+    border: 1px solid var(--color-border);
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+.request-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.request-header h3 {
+    margin: 0;
+    font-size: 1.125rem;
+}
+
+.request-details p {
+    margin: 0.25rem 0;
+}
+
+.admin-notes {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-top: 0.75rem;
+}
+
+.profile-actions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    gap: 1rem;
+}
+
+/* Reload Scholarships Styles */
+.reload-info {
+    margin-bottom: 2rem;
+}
+
+.import-details,
+.import-warnings {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+}
+
+.import-details h3,
+.import-warnings h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+}
+
+.import-details ul,
+.import-warnings ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.reload-actions {
+    margin-bottom: 2rem;
+}
+
+.alternative-actions {
+    margin-top: 1.5rem;
+}
+
+.command-line {
+    background-color: #f8f9fa;
+    border: 1px solid var(--color-border);
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.command-line code {
+    background: none;
+    padding: 0;
+}
+
+.back-link {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+}
+
+/* Site Footer */
 .site-footer {
     text-align: center;
     padding: 1.5rem 1rem;
@@ -205,6 +730,7 @@ form textarea:focus {
     margin-top: 2rem;
 }
 
+/* Responsive Design */
 @media (min-width: 768px) {
     .detail-list {
         grid-template-columns: 10rem 1fr;
@@ -226,6 +752,15 @@ form textarea:focus {
     .nav-links li {
         flex: 0 0 auto;
     }
+    
+    .filter-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .checkbox-group {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 @media print {
@@ -243,5 +778,13 @@ form textarea:focus {
 
     a {
         text-decoration: underline;
+    }
+    
+    .filter-actions,
+    .detail-actions,
+    .admin-actions,
+    .profile-actions,
+    .back-link {
+        display: none;
     }
 }

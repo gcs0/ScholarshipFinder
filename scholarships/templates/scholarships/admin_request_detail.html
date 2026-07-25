@@ -1,0 +1,94 @@
+{% extends "scholarships/base.html" %}
+
+{% block title %}Review Request #{{ request_obj.id }} — ScholarshipFinder{% endblock %}
+
+{% block content %}
+    <div class="request-review-header">
+        <h1>Review Scholarship Request #{{ request_obj.id }}</h1>
+        <span class="status-badge status-{{ request_obj.status }}">
+            {{ request_obj.status|title }}
+        </span>
+    </div>
+    
+    <div class="request-review-content">
+        <section class="request-details">
+            <h2>Request Information</h2>
+            <dl class="detail-list">
+                <dt>User</dt>
+                <dd>{{ request_obj.user.name }} ({{ request_obj.user.email }})</dd>
+                
+                <dt>User Education</dt>
+                <dd>{{ request_obj.user.education }}</dd>
+                
+                <dt>User Discipline</dt>
+                <dd>{{ request_obj.user.discipline }}</dd>
+                
+                <dt>Submitted</dt>
+                <dd>{{ request_obj.created_at|date:"F d, Y H:i" }}</dd>
+            </dl>
+        </section>
+        
+        <section class="scholarship-details">
+            <h2>Scholarship Information</h2>
+            <dl class="detail-list">
+                <dt>Scholarship Name</dt>
+                <dd>{{ request_obj.scholarship.scholarship_name }}</dd>
+                
+                <dt>Foundation</dt>
+                <dd>{{ request_obj.scholarship.foundation_name }}</dd>
+                
+                <dt>Type</dt>
+                <dd>{{ request_obj.scholarship.section }}</dd>
+                
+                <dt>Contents (Award)</dt>
+                <dd>{{ request_obj.scholarship.contents }}</dd>
+            </dl>
+        </section>
+        
+        {% if request_obj.status == 'pending' %}
+            <section class="review-actions">
+                <h2>Review Actions</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="admin_notes">Admin Notes:</label>
+                        <textarea name="admin_notes" id="admin_notes" rows="4" placeholder="Add any notes for this decision..."></textarea>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button type="submit" name="action" value="approve" class="button approve">
+                            Approve Request
+                        </button>
+                        <button type="submit" name="action" value="reject" class="button reject">
+                            Reject Request
+                        </button>
+                    </div>
+                </form>
+            </section>
+        {% else %}
+            <section class="review-result">
+                <h2>Review Result</h2>
+                <dl class="detail-list">
+                    <dt>Status</dt>
+                    <dd>{{ request_obj.status|title }}</dd>
+                    
+                    <dt>Reviewed By</dt>
+                    <dd>{{ request_obj.reviewed_by.name if request_obj.reviewed_by else 'N/A' }}</dd>
+                    
+                    <dt>Reviewed Date</dt>
+                    <dd>{{ request_obj.reviewed_date|date:"F d, Y H:i" if request_obj.reviewed_date else 'N/A' }}</dd>
+                    
+                    {% if request_obj.admin_notes %}
+                    <dt>Admin Notes</dt>
+                    <dd>{{ request_obj.admin_notes }}</dd>
+                    {% endif %}
+                </dl>
+            </section>
+        {% endif %}
+    </div>
+    
+    <div class="back-link">
+        <a href="{% url 'admin-requests' %}" class="button">Back to Requests</a>
+    </div>
+{% endblock %}

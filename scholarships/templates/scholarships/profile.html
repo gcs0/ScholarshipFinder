@@ -6,27 +6,52 @@
 <h1>Welcome, {{ user.name }}!</h1>
 <div class="profile-info">
     <p><strong>Email:</strong> {{ user.email }}</p>
-    <p><strong>Education:</strong> {{ user.education }}</p>
-    <p><strong>Discipline:</strong> {{ user.discipline }}</p>
-    <p><strong>Prefecture:</strong> {{ user.prefecture }}</p>
+    <p><strong>Education:</strong> {{ user.education|default:"Not specified" }}</p>
+    <p><strong>Discipline:</strong> {{ user.discipline|default:"Not specified" }}</p>
+    <p><strong>Prefecture:</strong> {{ user.prefecture|default:"Not specified" }}</p>
 </div>
+
 <h2>Your Scholarship Requests</h2>
 {% if user_requests %}
-    <ul class="request-list">
+    <div class="request-list">
         {% for request in user_requests %}
-            <li class="request-item">
-                <strong>{{ request.scholarship_name }}</strong>
-                <br>Provider: {{ request.provider }}
-                {% if request.award_amount %}<br>Award Amount: ${{ request.award_amount }}{% endif %}
-                {% if request.notes %}<br>Notes: {{ request.notes }}{% endif %}
-            </li>
+            <div class="request-item">
+                <div class="request-header">
+                    <h3>{{ request.scholarship.scholarship_name }}</h3>
+                    <span class="status-badge status-{{ request.status }}">
+                        {{ request.status|title }}
+                    </span>
+                </div>
+                
+                <div class="request-details">
+                    <p><strong>Foundation:</strong> {{ request.scholarship.foundation_name }}</p>
+                    <p><strong>Submitted:</strong> {{ request.created_at|date:"F d, Y H:i" }}</p>
+                    {% if request.scholarship.contents %}
+                    <p><strong>Award:</strong> {{ request.scholarship.contents }}</p>
+                    {% endif %}
+                </div>
+                
+                {% if request.admin_notes %}
+                <div class="admin-notes">
+                    <strong>Admin Notes:</strong> {{ request.admin_notes }}
+                </div>
+                {% endif %}
+                
+                {% if request.reviewed_date %}
+                <p><small>Reviewed: {{ request.reviewed_date|date:"F d, Y H:i" }}</small></p>
+                {% endif %}
+            </div>
         {% endfor %}
-    </ul>
+    </div>
 {% else %}
     <p>You haven't submitted any scholarship requests yet.</p>
-    <a href="{% url 'request-form' %}">Submit your first request</a>
+    <a href="{% url 'scholarship-list' %}" class="button">Browse Scholarships</a>
 {% endif %}
+
 <div class="profile-actions">
-    <a href="{% url 'password-change' %}">Change Password</a>
+    <a href="{% url 'password-change' %}" class="button">Change Password</a>
+    {% if user.is_superuser %}
+    <a href="{% url 'admin-dashboard' %}" class="button">Admin Dashboard</a>
+    {% endif %}
 </div>
 {% endblock %}

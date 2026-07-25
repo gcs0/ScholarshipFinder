@@ -1,29 +1,103 @@
 {% extends "scholarships/base.html" %}
+{% load scholarship_extras %}
 
 {% block title %}Scholarships — ScholarshipFinder{% endblock %}
 
 {% block content %}
     <h1>Available Scholarships</h1>
 
-    <section aria-label="Filter scholarships">
+    <button type="button" class="filter-toggle" onclick="toggleFilters()" aria-expanded="false">
+        Filters
+    </button>
+
+    <section id="filter-panel" aria-label="Filter scholarships" hidden>
         <form method="get">
-            {{ filter_form.as_p }}
-            <button type="submit">Filter</button>
-            <a href="{% url 'scholarship-list' %}" class="button">Clear</a>
+            <div class="filter-grid">
+                <div class="filter-field">
+                    <label for="id_section">Type</label>
+                    {{ filter_form.section }}
+                </div>
+                <div class="filter-field">
+                    <label for="id_scholarship_name">Name</label>
+                    {{ filter_form.scholarship_name }}
+                </div>
+                <div class="filter-field">
+                    <label for="id_designated_schools">Schools</label>
+                    {{ filter_form.designated_schools }}
+                </div>
+                <div class="filter-field">
+                    <label for="id_designated_fields">Fields</label>
+                    {{ filter_form.designated_fields }}
+                </div>
+                <div class="filter-field">
+                    <label for="id_plural_grants">Grants</label>
+                    {{ filter_form.plural_grants }}
+                </div>
+                <div class="filter-field">
+                    <label for="id_contents">Award</label>
+                    {{ filter_form.contents }}
+                </div>
+            </div>
+            <details class="qualifier-details">
+                <summary>School Year / Qualifier</summary>
+                <div class="checkbox-group">
+                    {{ filter_form.qualifier }}
+                </div>
+            </details>
+            <div class="filter-actions">
+                <button type="submit">Filter</button>
+                <a href="{% url 'scholarship-list' %}" class="button">Clear</a>
+            </div>
         </form>
     </section>
 
     {% if scholarships %}
-        <ul class="scholarship-list">
-            {% for s in scholarships %}
-                <li>
-                    <a href="{% url 'scholarship-detail' s.pk %}">{{ s.name }}</a>
-                    <br>
-                    <span class="meta">{{ s.provider }} &mdash; {{ s.award_amount }}</span>
-                </li>
-            {% endfor %}
-        </ul>
+        <div class="table-wrapper">
+            <table class="scholarship-table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Foundation</th>
+                        <th>Scholarship Name</th>
+                        <th>Qualifier</th>
+                        <th>Schools</th>
+                        <th>Fields</th>
+                        <th>Grants</th>
+                        <th>Award</th>
+                        <th>App Period</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in scholarships %}
+                        <tr>
+                            <td><span class="section-badge">{{ s.section|get_section_display }}</span></td>
+                            <td>{{ s.foundation_name }}</td>
+                            <td><a href="{% url 'scholarship-detail' s.pk %}">{{ s.scholarship_name }}</a></td>
+                            <td>{{ s.qualifier|expand_qualifier }}</td>
+                            <td>{{ s.designated_schools }}</td>
+                            <td>{{ s.designated_fields }}</td>
+                            <td>{{ s.plural_grants|display_grants }}</td>
+                            <td>{{ s.contents }}</td>
+                            <td>{{ s.application_period }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="result-count">{{ scholarships|length }} scholarship{{ scholarships|length|pluralize }} found</p>
     {% else %}
-        <p>No scholarships found.</p>
+        <p>No scholarships found matching your criteria.</p>
     {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleFilters() {
+    const panel = document.getElementById('filter-panel');
+    const btn = document.querySelector('.filter-toggle');
+    const hidden = panel.toggleAttribute('hidden');
+    btn.setAttribute('aria-expanded', !hidden);
+    btn.textContent = hidden ? 'Filters' : 'Hide Filters';
+}
+</script>
 {% endblock %}

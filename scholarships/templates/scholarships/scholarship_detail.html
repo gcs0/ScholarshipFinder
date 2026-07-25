@@ -1,26 +1,123 @@
 {% extends "scholarships/base.html" %}
+{% load scholarship_extras %}
 
-{% block title %}{{ scholarship.name }} — ScholarshipFinder{% endblock %}
+{% block title %}{{ scholarship.scholarship_name }} — ScholarshipFinder{% endblock %}
 
 {% block content %}
-    <h1>{{ scholarship.name }}</h1>
-    <dl class="detail-list">
-        <dt>Provider</dt>
-        <dd>{{ scholarship.provider }}</dd>
-        <dt>Award Amount</dt>
-        <dd>{{ scholarship.award_amount }}</dd>
-        <dt>Education Level</dt>
-        <dd>{{ scholarship.education_level }}</dd>
-        <dt>Discipline</dt>
-        <dd>{{ scholarship.discipline }}</dd>
-        <dt>Prefecture</dt>
-        <dd>{{ scholarship.prefecture }}</dd>
-        <dt>Deadline</dt>
-        <dd>{{ scholarship.deadline }}</dd>
-        <dt>Requirements</dt>
-        <dd>{{ scholarship.requirements }}</dd>
-        <dt>Description</dt>
-        <dd>{{ scholarship.description }}</dd>
-    </dl>
-    <a href="{% url 'scholarship-list' %}" class="button">Back to list</a>
+    <div class="scholarship-detail-header">
+        <h1>{{ scholarship.scholarship_name }}</h1>
+        <span class="section-badge">{{ scholarship.section|get_section_display }}</span>
+    </div>
+
+    <div class="scholarship-detail-content">
+        <section class="detail-section">
+            <h2>Basic Information</h2>
+            <dl class="detail-list">
+                <dt>Foundation</dt>
+                <dd>{{ scholarship.foundation_name }}</dd>
+                
+                <dt>Scholarship Type</dt>
+                <dd>{{ scholarship.section|get_section_display }}</dd>
+            </dl>
+        </section>
+
+        <section class="detail-section">
+            <h2>Contact Information</h2>
+            <dl class="detail-list">
+                {% if scholarship.address_contact %}
+                <dt>Address/Contact</dt>
+                <dd>{{ scholarship.address_contact|format_multiline }}</dd>
+                {% endif %}
+                
+                {% if scholarship.inquiry %}
+                <dt>Inquiry Method</dt>
+                <dd>{{ scholarship.inquiry }}</dd>
+                {% endif %}
+                
+                {% if scholarship.application %}
+                <dt>Application Method</dt>
+                <dd>{{ scholarship.application }}</dd>
+                {% endif %}
+            </dl>
+        </section>
+
+        <section class="detail-section">
+            <h2>Eligibility Requirements</h2>
+            <dl class="detail-list">
+                {% if scholarship.qualifier %}
+                <dt>School Year (Qualifier)</dt>
+                <dd>{{ scholarship.qualifier|expand_qualifier }}</dd>
+                {% endif %}
+                
+                {% if scholarship.designated_schools %}
+                <dt>Designated Schools</dt>
+                <dd>{{ scholarship.designated_schools|format_multiline }}</dd>
+                {% endif %}
+                
+                {% if scholarship.designated_fields %}
+                <dt>Designated Fields of Study</dt>
+                <dd>{{ scholarship.designated_fields|format_multiline }}</dd>
+                {% endif %}
+                
+                {% if scholarship.plural_grants %}
+                <dt>Multiple Grants Available</dt>
+                <dd>{{ scholarship.plural_grants }}</dd>
+                {% endif %}
+            </dl>
+        </section>
+
+        <section class="detail-section">
+            <h2>Scholarship Details</h2>
+            <dl class="detail-list">
+                {% if scholarship.contents %}
+                <dt>Contents (Award)</dt>
+                <dd>{{ scholarship.contents|format_multiline }}</dd>
+                {% endif %}
+                
+                {% if scholarship.duration %}
+                <dt>Duration</dt>
+                <dd>{{ scholarship.duration }}</dd>
+                {% endif %}
+                
+                {% if scholarship.application_period %}
+                <dt>Application Period</dt>
+                <dd>{{ scholarship.application_period }}</dd>
+                {% endif %}
+                
+                {% if scholarship.selection_method %}
+                <dt>Selection Method</dt>
+                <dd>{{ scholarship.selection_method }}</dd>
+                {% endif %}
+            </dl>
+        </section>
+
+        <section class="detail-section">
+            <h2>Additional Information</h2>
+            <dl class="detail-list">
+                {% if scholarship.additional_requirements %}
+                <dt>Additional Requirements</dt>
+                <dd>{{ scholarship.additional_requirements|format_multiline }}</dd>
+                {% endif %}
+                
+                {% if scholarship.grantees %}
+                <dt>Number of Grantees</dt>
+                <dd>{{ scholarship.grantees }}</dd>
+                {% endif %}
+                
+                {% if scholarship.grantees_applications %}
+                <dt>Grantees/Applications Ratio</dt>
+                <dd>{{ scholarship.grantees_applications }}</dd>
+                {% endif %}
+            </dl>
+        </section>
+
+        <section class="detail-actions">
+            {% if user.is_authenticated %}
+                <a href="{% url 'request-form' scholarship.id %}" class="button">Request This Scholarship</a>
+            {% else %}
+                <a href="{% url 'login' %}?next={% url 'request-form' scholarship.id %}" class="button">Login to Request</a>
+            {% endif %}
+            <a href="{% url 'scholarship-list' %}" class="button">Back to List</a>
+        </section>
+    </div>
 {% endblock %}

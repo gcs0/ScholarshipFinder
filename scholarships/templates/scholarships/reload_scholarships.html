@@ -1,0 +1,54 @@
+{% extends "scholarships/base.html" %}
+
+{% block title %}Reload Scholarships — ScholarshipFinder{% endblock %}
+
+{% block content %}
+    <h1>Reload Scholarship Data</h1>
+    
+    <div class="reload-info">
+        <h2>CSV Import Information</h2>
+        <p>This will reload all scholarship data from the <strong>Scholarships.csv</strong> file.</p>
+        
+        <div class="import-details">
+            <h3>Import Features:</h3>
+            <ul>
+                <li>✅ Overwrites existing scholarship data</li>
+                <li>✅ Handles complex multi-line CSV fields</li>
+                <li>✅ Skips problematic rows with detailed logging</li>
+                <li>✅ Generates import statistics</li>
+                <li>✅ Auto-cleans logs older than 1 week</li>
+            </ul>
+        </div>
+        
+        <div class="import-warnings">
+            <h3>⚠️ Important Notes:</h3>
+            <ul>
+                <li>This action cannot be undone</li>
+                <li>All existing scholarship data will be replaced</li>
+                <li>User requests will remain intact</li>
+                <li>Import logs are saved to <code>csv_import.log</code></li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="reload-actions">
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="button primary-action">
+                Start CSV Import
+            </button>
+        </form>
+        
+        <div class="alternative-actions">
+            <h3>Alternative Import Methods:</h3>
+            <div class="command-line">
+                <strong>Command Line:</strong>
+                <code>python manage.py import_scholarships --overwrite</code>
+            </div>
+        </div>
+    </div>
+    
+    <div class="back-link">
+        <a href="{% url 'admin-dashboard' %}" class="button">Back to Dashboard</a>
+    </div>
+{% endblock %}
