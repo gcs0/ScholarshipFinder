@@ -127,7 +127,8 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [
     BASE_DIR / "scholarships" / "static",
 ]
-STATICFILES_STORAGE = "whitenoise.storage.WhiteNoiseStaticFilesStorage"
+if not DEBUG:
+    STATICFILES_STORAGE = "whitenoise.storage.WhiteNoiseStaticFilesStorage"
 
 # Custom User Model
 AUTH_USER_MODEL = "scholarships.User"
