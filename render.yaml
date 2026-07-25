@@ -5,9 +5,16 @@ services:
     plan: free
     region: oregon
     buildCommand: >
+      echo "Starting build process..." &&
       pip install -r requirements.txt &&
+      echo "Creating staticfiles directory..." &&
+      mkdir -p staticfiles &&
+      echo "Running collectstatic..." &&
       python manage.py collectstatic --noinput --clear &&
-      python manage.py migrate
+      echo "Static files collected successfully" &&
+      echo "Running migrations..." &&
+      python manage.py migrate &&
+      echo "Build completed successfully"
     startCommand: gunicorn config.wsgi --log-file -
     envVars:
       - key: SECRET_KEY
