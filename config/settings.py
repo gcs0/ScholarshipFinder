@@ -127,8 +127,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [
     BASE_DIR / "scholarships" / "static",
 ]
-if not DEBUG:
-    STATICFILES_STORAGE = "whitenoise.storage.WhiteNoiseStaticFilesStorage"
+WHITENOISE_USE_FINDERS = True
 
 # Custom User Model
 AUTH_USER_MODEL = "scholarships.User"
@@ -141,8 +140,8 @@ LOGOUT_REDIRECT_URL = "login"
 # Security settings
 SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "False") == "True"
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SESSION_COOKIE_SECURE = SECURE_SSL_REDIRECT and not DEBUG
-CSRF_COOKIE_SECURE = SECURE_SSL_REDIRECT and not DEBUG
+SESSION_COOKIE_SECURE = SECURE_SSL_REDIRECT
+CSRF_COOKIE_SECURE = SECURE_SSL_REDIRECT
 CSRF_TRUSTED_ORIGINS = (
     os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
     if os.getenv("CSRF_TRUSTED_ORIGINS")
