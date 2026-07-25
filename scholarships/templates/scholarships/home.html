@@ -9,7 +9,7 @@
         <ul>
             <li><a href="{% url 'scholarship-list' %}">Browse Scholarships</a></li>
             {% if user.is_authenticated %}
-                <li><a href="{% url 'request-form' %}">Submit a Scholarship Request</a></li>
+                <li><a href="{% url 'scholarship-list' %}">Submit a Scholarship Request</a></li>
             {% else %}
                 <li><a href="{% url 'register' %}">Register to Submit Requests</a></li>
             {% endif %}

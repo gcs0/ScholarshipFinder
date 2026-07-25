@@ -7,27 +7,33 @@
 pip install django
 ```
 
-### 2. Run Setup Script
+### 2. Configure Admin Password
+```bash
+copy .env.example .env
+```
+Then edit `.env` and set `ADMIN_PASSWORD` to your desired password (or keep the default).
+
+### 3. Run Setup Script
 ```bash
 python setup_admin.py
 ```
 
 This will:
 - Create database tables
-- Set up admin account
+- Set up admin account (reads password from `.env`)
 - Configure the system
 
-### 3. Import Scholarship Data
+### 4. Import Scholarship Data
 ```bash
 python manage.py import_scholarships --overwrite
 ```
 
-### 4. Start Development Server
+### 5. Start Development Server
 ```bash
 python manage.py runserver
 ```
 
-### 5. Access the Application
+### 6. Access the Application
 - **Main Site**: http://localhost:8000/
 - **Admin Panel**: http://localhost:8000/admin/
 - **Admin Dashboard**: http://localhost:8000/admin/
@@ -35,10 +41,11 @@ python manage.py runserver
 ## Admin Login
 
 - **Email:** `admin@scholarshipfinder.local` ⬅️ use this to log in
-- **Password:** `txUqzbAcoRa5$2`
+- **Password:** The value you set in `.env` (default: `txUqzbAcoRa5$2`)
 - **Note:** Login requires the **email address**, not the username
+- **Setup:** See `SECURITY.md` for detailed instructions
 
-⚠️ **Important**: See `SECURITY.md` for detailed security information.
+⚠️ **Important**: Never commit `.env` to version control. It's already in `.gitignore`.
 
 ## Features
 

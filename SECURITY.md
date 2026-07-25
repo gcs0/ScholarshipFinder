@@ -2,72 +2,62 @@
 
 ## Admin Credentials
 
-**⚠️ IMPORTANT SECURITY NOTICE — LOGIN WITH EMAIL, NOT USERNAME**
-
-The system uses email-based authentication. You must log in with the email address, not the username.
+**⚠️ The admin password is stored in `.env` (gitignored) — never hardcoded in source code.**
 
 - **Username:** `jtob` (for reference only — not used for login)
 - **Email (for login):** `admin@scholarshipfinder.local`
-- **Password:** `txUqzbAcoRa5$2`
+- **Password:** Set via `.env` file — see below
 
-### Security Measures Implemented
+### Setup
 
-1. **Password Hashing**: Django uses PBKDF2 with SHA256 hash algorithm by default
-2. **Superuser Access**: Admin account has both `is_superuser` and `is_staff` permissions
-3. **Admin Interface**: Full access to Django admin panel and custom admin views
+1. Copy `.env.example` to `.env`:
+   ```bash
+   copy .env.example .env
+   ```
+2. Edit `.env` and set `ADMIN_PASSWORD` to your desired password (or keep the default)
+3. Run the setup script:
+   ```bash
+   python setup_admin.py
+   ```
 
-### Setup Instructions
-
-#### Initial Setup
-```bash
-# Run the admin setup script
-python setup_admin.py
-```
-
-This script will:
-- Run all database migrations
-- Create the admin account with hashed password
-- Provide setup confirmation
-
-#### Manual Admin Creation
-If you need to create the admin account manually:
-
-```bash
-python manage.py createsuperuser
-```
-
-Then provide:
-- Username: `jtob`
-- Email: `admin@scholarshipfinder.local` 
-- Password: `txUqzbAcoRa5$2`
+The script reads the password from `.env` or the `ADMIN_PASSWORD` environment variable. If neither is set, it generates a random 16-character password and prints it once.
 
 ### Security Best Practices
 
-#### Development Environment
-1. ✅ Admin credentials are stored in Django's built-in password hashing
-2. ✅ Never commit actual passwords to version control
-3. ✅ Use environment variables for sensitive data in production
+| Environment | Password Source | Notes |
+|-------------|----------------|-------|
+| Development | `.env` file | Default password safe for local dev |
+| Production | Environment variable | Use `ADMIN_PASSWORD=... python setup_admin.py` or set in CI/CD secrets |
 
 #### Production Deployment
-1. **Environment Variables**: Store admin credentials in environment variables
-2. **Password Rotation**: Change admin password immediately after first deployment
-3. **Access Logging**: Monitor admin access logs
-4. **HTTPS Only**: Ensure admin panel is only accessible via HTTPS
+1. **Environment Variables**: Set `ADMIN_PASSWORD` via your deployment platform's secrets manager
+2. **Password Rotation**: Change admin password immediately after each deployment
+3. **HTTPS Only**: Ensure admin panel is only accessible via HTTPS
+4. **Access Logging**: Monitor admin access logs
 5. **IP Whitelisting**: Restrict admin access to specific IP addresses
 
 #### Git Security
-The following files should never be committed to version control:
-- ❌ `.env` files containing actual credentials
-- ❌ Hardcoded passwords in Python files
-- ❌ Configuration files with sensitive data
+The following files must **never** be committed:
+- ❌ `.env` — contains real secrets (it's in `.gitignore`)
+- ❌ `*.env.local` — local overrides
 
-Add to `.gitignore`:
+Safe to commit:
+- ✅ `.env.example` — template with placeholder values only
+
+Add to `.gitignore` (already done):
 ```
 .env
-*.env
-local_settings.py
-csv_import.log
+.env.local
+*.env.local
 ```
+
+### Login Instructions
+
+The `User` model uses `USERNAME_FIELD = "email"`. You must log in with the **email address**, not the username.
+
+**Login URL:** http://localhost:8000/login/  
+**Email:** `admin@scholarshipfinder.local`  
+**Password:** The value you set in `.env`
 
 ### Admin Features
 
@@ -96,18 +86,18 @@ The admin account (`jtob`) has access to:
 
 ### Access URLs
 
-- **Django Admin**: `http://localhost:8000/admin/`
-- **Custom Admin Dashboard**: `http://localhost:8000/admin/`
-- **Request Management**: `http://localhost:8000/admin/requests/`
-- **CSV Reload**: `http://localhost:8000/admin/reload/`
+- **Django Admin**: http://localhost:8000/admin/
+- **Custom Admin Dashboard**: http://localhost:8000/admin/
+- **Request Management**: http://localhost:8000/admin/requests/
+- **CSV Reload**: http://localhost:8000/admin/reload/
 
 ### Password Security
 
-The admin password `txUqzbAcoRa5$2` is:
-- ✅ Hashed using Django's PBKDF2 algorithm
-- ✅ Stored securely in the database
+Passwords are:
+- ✅ Hashed using Django's PBKDF2 algorithm (stored in database)
+- ✅ Never stored in source code
 - ✅ Never exposed in logs or error messages
-- ⚠️ Should be changed for production use
+- ✅ Configurable via `.env` or environment variables
 
 ### Troubleshooting
 
@@ -119,7 +109,6 @@ python manage.py changepassword jtob
 
 #### Permission Issues
 ```bash
-# Ensure user is superuser
 python manage.py shell
 >>> from django.contrib.auth import get_user_model
 >>> User = get_user_model()
@@ -131,7 +120,6 @@ python manage.py shell
 
 #### Database Issues
 ```bash
-# Reset database (WARNING: Deletes all data)
 del db.sqlite3
 python manage.py migrate
 python setup_admin.py
@@ -142,7 +130,7 @@ python setup_admin.py
 #### Regular Tasks
 1. **Weekly**: Check CSV import logs for errors
 2. **Monthly**: Review admin access logs
-3. **Quarterly**: Update admin password
+3. **Quarterly**: Update admin password via `.env` and `python manage.py changepassword jtob`
 4. **As needed**: Monitor request approval queue
 
 #### Log Files
@@ -159,4 +147,4 @@ For security issues or admin access problems:
 
 ---
 
-**Remember**: Never share admin credentials publicly or commit them to version control!
+**Remember**: Never share admin credentials publicly or commit `.env` to version control!

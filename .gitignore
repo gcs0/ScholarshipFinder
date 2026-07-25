@@ -19,3 +19,8 @@ htmlcov/
 # OS artifacts
 .DS_Store
 Thumbs.db
+
+# Environment variables with secrets
+.env
+.env.local
+*.env.local
