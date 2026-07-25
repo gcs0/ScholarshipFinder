@@ -15,15 +15,34 @@
                 {% url 'home' as home_url %}
                 {% url 'scholarship-list' as list_url %}
                 {% url 'request-form' as request_url %}
-                {% url 'user-create' as user_url %}
+                {% url 'profile' as profile_url %}
+                {% url 'login' as login_url %}
+                {% url 'register' as register_url %}
+                {% url 'logout' as logout_url %}
                 <li><a href="{{ home_url }}" {% if request.path == home_url %}aria-current="page"{% endif %}>Home</a></li>
                 <li><a href="{{ list_url }}" {% if request.path == list_url %}aria-current="page"{% endif %}>Scholarships</a></li>
-                <li><a href="{{ request_url }}" {% if request.path == request_url %}aria-current="page"{% endif %}>New Request</a></li>
-                <li><a href="{{ user_url }}" {% if request.path == user_url %}aria-current="page"{% endif %}>Register</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{{ request_url }}" {% if request.path == request_url %}aria-current="page"{% endif %}>New Request</a></li>
+                    <li><a href="{{ profile_url }}" {% if request.path == profile_url %}aria-current="page"{% endif %}>Profile</a></li>
+                    <li><form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit">Logout</button>
+                    </form></li>
+                {% else %}
+                    <li><a href="{{ login_url }}" {% if request.path == login_url %}aria-current="page"{% endif %}>Login</a></li>
+                    <li><a href="{{ register_url }}" {% if request.path == register_url %}aria-current="page"{% endif %}>Register</a></li>
+                {% endif %}
             </ul>
         </nav>
     </header>
     <main id="main-content" class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
         {% block content %}{% endblock %}
     </main>
     <footer class="site-footer">

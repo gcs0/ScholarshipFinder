@@ -1,7 +1,17 @@
-from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.views import PasswordChangeDoneView, PasswordChangeView
+from django.shortcuts import redirect, render
 
-from .forms import ScholarshipFilterForm, ScholarshipRequestForm, UserForm
-from .models import Scholarship, User
+from .forms import (
+    CustomLoginForm,
+    RegistrationForm,
+    ScholarshipFilterForm,
+    ScholarshipRequestForm,
+)
+from .models import Scholarship, ScholarshipRequest, User
 
 
 def home(request):
@@ -29,7 +39,7 @@ def scholarship_list(request):
 
 
 def scholarship_detail(request, pk):
-    scholarship = get_object_or_404(Scholarship, pk=pk)
+    scholarship = Scholarship.objects.get(pk=pk)
     return render(
         request,
         "scholarships/scholarship_detail.html",
@@ -37,38 +47,81 @@ def scholarship_detail(request, pk):
     )
 
 
+@login_required
 def request_form(request):
     if request.method == "POST":
         form = ScholarshipRequestForm(request.POST)
         if form.is_valid():
-            request_obj = form.save()
-            return render(
-                request,
-                "scholarships/request_success.html",
-                {"request_obj": request_obj},
-            )
+            request_obj = form.save(commit=False)
+            request_obj.user = request.user
+            request_obj.save()
+            messages.success(request, "Your scholarship request has been submitted!")
+            return redirect("profile")
     else:
         form = ScholarshipRequestForm()
 
     return render(request, "scholarships/request_form.html", {"form": form})
 
 
-def user_create(request):
+def register(request):
     if request.method == "POST":
-        form = UserForm(request.POST)
+        form = RegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            return redirect("user-detail", pk=user.pk)
+            email = form.cleaned_data.get("email")
+            raw_password = form.cleaned_data.get("password1")
+            user = authenticate(username=email, password=raw_password)
+            login(request, user)
+            messages.success(request, "Registration successful! You are now logged in.")
+            return redirect("profile")
     else:
-        form = UserForm()
+        form = RegistrationForm()
 
-    return render(request, "scholarships/user_form.html", {"form": form})
+    return render(request, "scholarships/register.html", {"form": form})
 
 
-def user_detail(request, pk):
-    user_obj = get_object_or_404(User, pk=pk)
+def user_login(request):
+    if request.method == "POST":
+        form = CustomLoginForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get("username")
+            password = form.cleaned_data.get("password")
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, "Login successful!")
+                next_url = request.GET.get("next", "profile")
+                return redirect(next_url)
+            else:
+                messages.error(request, "Invalid username or password.")
+        else:
+            messages.error(request, "Invalid username or password.")
+    else:
+        form = CustomLoginForm()
+
+    return render(request, "scholarships/login.html", {"form": form})
+
+
+def user_logout(request):
+    logout(request)
+    messages.success(request, "You have been logged out successfully.")
+    return redirect("login")
+
+
+@login_required
+def profile(request):
+    user_requests = ScholarshipRequest.objects.filter(user=request.user)
     return render(
         request,
-        "scholarships/user_detail.html",
-        {"user_obj": user_obj},
+        "scholarships/profile.html",
+        {"user_requests": user_requests},
     )
+
+
+class CustomPasswordChangeView(PasswordChangeView):
+    template_name = "scholarships/password_change.html"
+    success_url = "/password-change/done/"
+
+
+class CustomPasswordChangeDoneView(PasswordChangeDoneView):
+    template_name = "scholarships/password_change_done.html"

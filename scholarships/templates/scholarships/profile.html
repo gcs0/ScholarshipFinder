@@ -1,0 +1,32 @@
+{% extends "scholarships/base.html" %}
+
+{% block title %}Profile - {{ user.name }}{% endblock %}
+
+{% block content %}
+<h1>Welcome, {{ user.name }}!</h1>
+<div class="profile-info">
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Education:</strong> {{ user.education }}</p>
+    <p><strong>Discipline:</strong> {{ user.discipline }}</p>
+    <p><strong>Prefecture:</strong> {{ user.prefecture }}</p>
+</div>
+<h2>Your Scholarship Requests</h2>
+{% if user_requests %}
+    <ul class="request-list">
+        {% for request in user_requests %}
+            <li class="request-item">
+                <strong>{{ request.scholarship_name }}</strong>
+                <br>Provider: {{ request.provider }}
+                {% if request.award_amount %}<br>Award Amount: ${{ request.award_amount }}{% endif %}
+                {% if request.notes %}<br>Notes: {{ request.notes }}{% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>You haven't submitted any scholarship requests yet.</p>
+    <a href="{% url 'request-form' %}">Submit your first request</a>
+{% endif %}
+<div class="profile-actions">
+    <a href="{% url 'password-change' %}">Change Password</a>
+</div>
+{% endblock %}

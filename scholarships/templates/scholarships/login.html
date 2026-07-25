@@ -1,0 +1,14 @@
+{% extends "scholarships/base.html" %}
+
+{% block title %}Login - ScholarshipFinder{% endblock %}
+
+{% block content %}
+<h1>Login</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Login</button>
+</form>
+<p>Don't have an account? <a href="{% url 'register' %}">Register here</a>.</p>
+<p>Forgot your password? Please contact scholarship@jtob.org for password reset requests.</p>
+{% endblock %}

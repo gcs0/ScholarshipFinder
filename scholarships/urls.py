@@ -11,6 +11,18 @@ urlpatterns = [
         name="scholarship-detail",
     ),
     path("requests/new/", views.request_form, name="request-form"),
-    path("users/new/", views.user_create, name="user-create"),
-    path("users/<int:pk>/", views.user_detail, name="user-detail"),
+    path("register/", views.register, name="register"),
+    path("login/", views.user_login, name="login"),
+    path("logout/", views.user_logout, name="logout"),
+    path("profile/", views.profile, name="profile"),
+    path(
+        "password-change/",
+        views.CustomPasswordChangeView.as_view(),
+        name="password-change",
+    ),
+    path(
+        "password-change/done/",
+        views.CustomPasswordChangeDoneView.as_view(),
+        name="password-change-done",
+    ),
 ]
