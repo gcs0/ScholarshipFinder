@@ -26,7 +26,7 @@
             <dl class="detail-list">
                 {% if scholarship.address_contact %}
                 <dt>Address/Contact</dt>
-                <dd>{{ scholarship.address_contact|format_multiline }}</dd>
+                <dd class="text-clamp">{{ scholarship.address_contact|format_multiline }}</dd>
                 {% endif %}
                 
                 {% if scholarship.inquiry %}
@@ -46,17 +46,17 @@
             <dl class="detail-list">
                 {% if scholarship.qualifier %}
                 <dt>School Year (Qualifier)</dt>
-                <dd>{{ scholarship.qualifier|expand_qualifier }}</dd>
+                <dd class="text-clamp">{{ scholarship.qualifier|expand_qualifier }}</dd>
                 {% endif %}
                 
                 {% if scholarship.designated_schools %}
                 <dt>Designated Schools</dt>
-                <dd>{{ scholarship.designated_schools|format_multiline }}</dd>
+                <dd class="text-clamp">{{ scholarship.designated_schools|format_multiline }}</dd>
                 {% endif %}
                 
                 {% if scholarship.designated_fields %}
                 <dt>Designated Fields of Study</dt>
-                <dd>{{ scholarship.designated_fields|format_multiline }}</dd>
+                <dd class="text-clamp">{{ scholarship.designated_fields|format_multiline }}</dd>
                 {% endif %}
                 
                 {% if scholarship.plural_grants %}
@@ -71,7 +71,7 @@
             <dl class="detail-list">
                 {% if scholarship.contents %}
                 <dt>Contents (Award)</dt>
-                <dd>{{ scholarship.contents|format_multiline }}</dd>
+                <dd class="text-clamp">{{ scholarship.contents|format_multiline }}</dd>
                 {% endif %}
                 
                 {% if scholarship.duration %}
@@ -96,7 +96,7 @@
             <dl class="detail-list">
                 {% if scholarship.additional_requirements %}
                 <dt>Additional Requirements</dt>
-                <dd>{{ scholarship.additional_requirements|format_multiline }}</dd>
+                <dd class="text-clamp">{{ scholarship.additional_requirements|format_multiline }}</dd>
                 {% endif %}
                 
                 {% if scholarship.grantees %}
@@ -111,6 +111,16 @@
             </dl>
         </section>
 
+        {% if scholarship.notes %}
+        <section class="detail-section">
+            <h2>Additional Notes</h2>
+            <dl class="detail-list">
+                <dt>Notes</dt>
+                <dd class="text-clamp">{{ scholarship.notes|format_multiline }}</dd>
+            </dl>
+        </section>
+        {% endif %}
+
         <section class="detail-actions">
             {% if user.is_authenticated %}
                 <a href="{% url 'request-form' scholarship.id %}" class="button">Request This Scholarship</a>
@@ -120,4 +130,40 @@
             <a href="{% url 'scholarship-list' %}" class="button">Back to List</a>
         </section>
     </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var CLAMP_HEIGHT_EM = 4.8;
+
+    function needsToggle(el) {
+        return el.scrollHeight > el.clientHeight;
+    }
+
+    function toggleClamp(btn) {
+        var dd = btn.parentElement.querySelector('.text-clamp');
+        if (!dd) return;
+        var expanded = dd.classList.toggle('expanded');
+        btn.textContent = expanded ? 'Show less' : 'Show more';
+    }
+
+    var clamps = document.querySelectorAll('.text-clamp');
+    clamps.forEach(function(el) {
+        var btn = document.createElement('button');
+        btn.className = 'clamp-toggle';
+        btn.textContent = 'Show more';
+        btn.type = 'button';
+        el.parentElement.appendChild(btn);
+
+        if (!needsToggle(el)) {
+            btn.style.display = 'none';
+        }
+
+        btn.addEventListener('click', function(e) {
+            toggleClamp(btn);
+        });
+    });
+})();
+</script>
 {% endblock %}

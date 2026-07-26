@@ -18,11 +18,11 @@ class User(AbstractUser):
 
 class Scholarship(models.Model):
     SECTION_CHOICES = [
-        ('III', 'Local Govts & Intl Associations'),
-        ('IV', 'Private Foundations'),
-        ('V', 'For Applicants Residing Abroad'),
+        ("III", "Local Govts & Intl Associations"),
+        ("IV", "Private Foundations"),
+        ("V", "For Applicants Residing Abroad"),
     ]
-    
+
     section = models.CharField(max_length=50, choices=SECTION_CHOICES)
     foundation_name = models.CharField(max_length=500)
     scholarship_name = models.CharField(max_length=500)
@@ -40,11 +40,12 @@ class Scholarship(models.Model):
     selection_method = models.CharField(max_length=200, blank=True, default="")
     grantees = models.CharField(max_length=100, blank=True, default="")
     grantees_applications = models.CharField(max_length=100, blank=True, default="")
+    notes = models.TextField(blank=True, default="")
     imported_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ['foundation_name', 'scholarship_name']
-        ordering = ['section', 'foundation_name', 'scholarship_name']
+        unique_together = ["foundation_name", "scholarship_name"]
+        ordering = ["section", "foundation_name", "scholarship_name"]
 
     def __str__(self):
         return f"{self.scholarship_name} - {self.foundation_name}"
@@ -52,22 +53,25 @@ class Scholarship(models.Model):
 
 class ScholarshipRequest(models.Model):
     STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
+        ("pending", "Pending"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
     ]
-    
+
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="scholarship_requests"
     )
     scholarship = models.ForeignKey(
         Scholarship, on_delete=models.CASCADE, related_name="requests"
     )
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     admin_notes = models.TextField(blank=True, default="")
     reviewed_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True, 
-        related_name="reviewed_requests"
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="reviewed_requests",
     )
     reviewed_date = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -3,9 +3,9 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.views import PasswordChangeDoneView, PasswordChangeView
+from django.core.management import call_command
 from django.shortcuts import redirect, render
 from django.utils import timezone
-from django.core.management import call_command
 
 from .forms import (
     CustomLoginForm,

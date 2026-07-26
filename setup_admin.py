@@ -5,8 +5,9 @@ If neither is set, generates a random password printed to stdout.
 """
 
 import os
-import sys
 import secrets
+import sys
+
 import django
 
 # Setup Django environment
