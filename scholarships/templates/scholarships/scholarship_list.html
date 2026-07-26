@@ -73,7 +73,7 @@
                             <td><span class="section-badge">{{ s.section|get_section_display }}</span></td>
                             <td>{{ s.foundation_name }}</td>
                             <td><a href="{% url 'scholarship-detail' s.pk %}">{{ s.scholarship_name }}</a></td>
-                            <td>{{ s.qualifier|expand_qualifier }}</td>
+                            <td><div class="text-clamp" id="qualifier-{{ s.pk }}">{{ s.qualifier|expand_qualifier }}</div><button class="clamp-toggle" onclick="toggleClamp('qualifier-{{ s.pk }}')" data-target="qualifier-{{ s.pk }}">Show more</button></td>
                             <td><div class="text-clamp" id="schools-{{ s.pk }}">{{ s.designated_schools }}</div><button class="clamp-toggle" onclick="toggleClamp('schools-{{ s.pk }}')" data-target="schools-{{ s.pk }}">Show more</button></td>
                             <td><div class="text-clamp" id="fields-{{ s.pk }}">{{ s.designated_fields }}</div><button class="clamp-toggle" onclick="toggleClamp('fields-{{ s.pk }}')" data-target="fields-{{ s.pk }}">Show more</button></td>
                             <td>{{ s.plural_grants|display_grants }}</td>
