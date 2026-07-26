@@ -32,7 +32,14 @@ class Scholarship(models.Model):
     qualifier = models.CharField(max_length=200, blank=True, default="")
     designated_schools = models.TextField(blank=True, default="")
     designated_fields = models.TextField(blank=True, default="")
-    plural_grants = models.CharField(max_length=50, blank=True, default="")
+    PLURAL_GRANTS_CHOICES = [
+        ("Yes", "Yes"),
+        ("No", "No"),
+        ("Unknown", "Unknown"),
+    ]
+    plural_grants = models.CharField(
+        max_length=7, choices=PLURAL_GRANTS_CHOICES, blank=True, default=""
+    )
     additional_requirements = models.TextField(blank=True, default="")
     contents = models.TextField(blank=True, default="")
     duration = models.CharField(max_length=200, blank=True, default="")

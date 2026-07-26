@@ -94,6 +94,14 @@ class Command(BaseCommand):
                             stats["skipped"] += 1
                             continue
 
+                        raw_plural_grants = scholarship_data.pop(
+                            "_raw_plural_grants", ""
+                        )
+                        normalized, notes_text = self._normalize_plural_grants(
+                            raw_plural_grants
+                        )
+                        scholarship_data["plural_grants"] = normalized
+
                         # Save or update scholarship
                         with transaction.atomic():
                             obj, created = Scholarship.objects.update_or_create(
@@ -101,6 +109,21 @@ class Command(BaseCommand):
                                 scholarship_name=scholarship_data["scholarship_name"],
                                 defaults=scholarship_data,
                             )
+
+                            if notes_text:
+                                note_line = f"[Plural Grants] {notes_text}"
+                                if created:
+                                    obj.notes = note_line
+                                    obj.save(update_fields=["notes"])
+                                else:
+                                    existing_notes = obj.notes or ""
+                                    if note_line not in existing_notes:
+                                        obj.notes = (
+                                            existing_notes + "\n" + note_line
+                                            if existing_notes
+                                            else note_line
+                                        )
+                                        obj.save(update_fields=["notes"])
 
                             if created:
                                 stats["created"] += 1
@@ -183,7 +206,7 @@ class Command(BaseCommand):
             # 16=Duration, 17=AppPeriod, 18=SelectionMethod, 19=Grantees, 20=PrevYear
             designated_schools = row[10].strip() if len(row) > 10 else ""
             designated_fields = row[11].strip() if len(row) > 11 else ""
-            plural_grants = row[12].strip() if len(row) > 12 else ""
+            _raw_plural_grants = row[12].strip() if len(row) > 12 else ""
             additional_requirements = row[14].strip() if len(row) > 14 else ""
             contents = row[15].strip() if len(row) > 15 else ""
             duration = row[16].strip() if len(row) > 16 else ""
@@ -202,7 +225,7 @@ class Command(BaseCommand):
                 "qualifier": qualifier,
                 "designated_schools": designated_schools,
                 "designated_fields": designated_fields,
-                "plural_grants": plural_grants,
+                "_raw_plural_grants": _raw_plural_grants,
                 "additional_requirements": additional_requirements,
                 "contents": contents,
                 "duration": duration,
@@ -215,6 +238,46 @@ class Command(BaseCommand):
         except Exception as e:
             logger.error(f"Error parsing row {row_num}: {str(e)}")
             return None
+
+    def _normalize_plural_grants(self, raw_value):
+        """Normalize a raw plural_grants value to Yes/No/Unknown.
+
+        Returns (normalized_value, notes_text).
+        """
+        if not raw_value:
+            return ("", "")
+
+        parts = [line.strip() for line in raw_value.split("\n") if line.strip()]
+        if not parts:
+            return ("", "")
+
+        first_line = parts[0]
+        first_upper = first_line.upper().strip()
+
+        # Determine label: Y prefix -> Yes, N prefix -> No, else Unknown
+        if first_upper.startswith("Y"):
+            label = "Yes"
+            rest_of_first = first_line[1:].strip()
+        elif first_upper.startswith("N"):
+            label = "No"
+            rest_of_first = first_line[1:].strip()
+        else:
+            label = "Unknown"
+            rest_of_first = first_line
+
+        # Build notes from remainder of first line + extra lines
+        extra_lines = parts[1:]
+        notes_parts = []
+        if rest_of_first:
+            notes_parts.append(rest_of_first)
+        if extra_lines:
+            notes_parts.extend(extra_lines)
+
+        notes = " ".join(notes_parts) if notes_parts else ""
+        if label == "Unknown" and not notes:
+            notes = first_line
+
+        return (label, notes)
 
     def clean_old_logs(self):
         """Remove log files older than 1 week"""

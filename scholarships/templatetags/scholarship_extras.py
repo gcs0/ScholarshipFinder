@@ -1,6 +1,7 @@
+import re
+
 from django import template
 from django.utils.safestring import mark_safe
-import re
 
 register = template.Library()
 
@@ -42,22 +43,8 @@ def expand_qualifier(qualifier_string):
 
 @register.filter
 def display_grants(value):
-    """Display plural_grants data — handle raw Y/N multi-line values"""
-    if not value:
-        return ""
-    parts = [line.strip() for line in value.split("\n") if line.strip()]
-    if not parts:
-        return ""
-    first = parts[0].upper()
-    if first == "Y":
-        label = "Yes"
-    elif first == "N":
-        label = "No"
-    else:
-        label = parts[0]
-    if len(parts) > 1:
-        return f"{label} — {' '.join(parts[1:])}"
-    return label
+    """Display plural_grants — value is Yes, No, Unknown, or blank"""
+    return value if value else ""
 
 
 @register.filter

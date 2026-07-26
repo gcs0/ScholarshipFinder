@@ -1,5 +1,5 @@
 import re
-import re
+
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import (
@@ -33,7 +33,15 @@ class UserForm(forms.ModelForm):
 class RegistrationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = ("name", "email", "education", "discipline", "prefecture", "password1", "password2")
+        fields = (
+            "name",
+            "email",
+            "education",
+            "discipline",
+            "prefecture",
+            "password1",
+            "password2",
+        )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -58,7 +66,9 @@ class CustomLoginForm(AuthenticationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["username"].label = "Email"
-        self.fields["username"].widget.attrs.update({"placeholder": "Enter your email address", "autocomplete": "email"})
+        self.fields["username"].widget.attrs.update(
+            {"placeholder": "Enter your email address", "autocomplete": "email"}
+        )
         self.fields["password"].widget.attrs.update({"placeholder": "Password"})
 
 
@@ -76,20 +86,24 @@ class ScholarshipRequestForm(forms.ModelForm):
 class ScholarshipFilterForm(forms.Form):
     section = forms.ChoiceField(choices=[], required=False, label="Scholarship Type")
     scholarship_name = forms.CharField(required=False, label="Scholarship Name")
-    qualifier = forms.MultipleChoiceField(choices=[], required=False, label="School Year", widget=forms.CheckboxSelectMultiple)
+    qualifier = forms.MultipleChoiceField(
+        choices=[],
+        required=False,
+        label="School Year",
+        widget=forms.CheckboxSelectMultiple,
+    )
     designated_schools = forms.CharField(required=False, label="Designated Schools")
     designated_fields = forms.CharField(required=False, label="Fields of Study")
-    plural_grants = forms.ChoiceField(choices=[], required=False, label="Multiple Grants")
+    plural_grants = forms.ChoiceField(
+        choices=[], required=False, label="Multiple Grants"
+    )
     award_amount_min = forms.IntegerField(
-        required=False, 
-        min_value=0, 
+        required=False,
+        min_value=0,
         max_value=600000,
         label="Minimum Award (¥/month)",
         help_text="Enter minimum monthly award amount. Variable amounts will always be included.",
-        widget=forms.NumberInput(attrs={
-            'placeholder': 'e.g., 50000',
-            'step': '1000'
-        })
+        widget=forms.NumberInput(attrs={"placeholder": "e.g., 50000", "step": "1000"}),
     )
 
     def __init__(self, *args, **kwargs):
@@ -100,34 +114,41 @@ class ScholarshipFilterForm(forms.Form):
 
         self.fields["qualifier"].choices = self._get_qualifier_choices()
 
-        plural_grants_values = (
-            Scholarship.objects.values_list("plural_grants", flat=True)
-            .distinct()
-            .exclude(plural_grants="")
-            .order_by("plural_grants")
-        )
-        plural_grants_choices = [("", "All")] + [(v, v) for v in plural_grants_values]
-        self.fields["plural_grants"].choices = plural_grants_choices
+        self.fields["plural_grants"].choices = [
+            ("", "All"),
+            ("Yes", "Yes"),
+            ("No", "No"),
+            ("Unknown", "Unknown"),
+        ]
 
     def _get_qualifier_choices(self):
         # Use a dictionary to track display names and their base codes
         display_name_to_base_code = {}
-        
-        for qualifier_str in Scholarship.objects.values_list("qualifier", flat=True).distinct():
+
+        for qualifier_str in Scholarship.objects.values_list(
+            "qualifier", flat=True
+        ).distinct():
             if qualifier_str:
                 # Clean and normalize the qualifier string
                 cleaned_str = qualifier_str.strip()
                 # Replace full-width characters with ASCII equivalents
-                cleaned_str = cleaned_str.replace('Ｍ', 'M').replace('Ｄ', 'D').replace('）', ')').replace('（', '(')
+                cleaned_str = (
+                    cleaned_str.replace("Ｍ", "M")
+                    .replace("Ｄ", "D")
+                    .replace("）", ")")
+                    .replace("（", "(")
+                )
                 # Split by newlines and process each code
-                codes = [code.strip() for code in cleaned_str.split('\n') if code.strip()]
-                
+                codes = [
+                    code.strip() for code in cleaned_str.split("\n") if code.strip()
+                ]
+
                 for code in codes:
                     # Extract base qualifier code (e.g., extract "U" from "U(2-3)" or "U2")
                     # Only include codes that start with letters followed by optional digits
-                    if re.match(r'^[A-Za-z]+(?:\d+)?(?:\s*[\(,\-]|$)', code):
+                    if re.match(r"^[A-Za-z]+(?:\d+)?(?:\s*[\(,\-]|$)", code):
                         # Extract the base code for mapping lookup
-                        base_code_match = re.match(r'^([A-Za-z]+)(?:\d+)?', code)
+                        base_code_match = re.match(r"^([A-Za-z]+)(?:\d+)?", code)
                         if base_code_match:
                             base_code = base_code_match.group(1)
                             # Only use codes that exist in QUALIFIER_MAPPING
@@ -138,6 +159,9 @@ class ScholarshipFilterForm(forms.Form):
                                     display_name_to_base_code[display_name] = base_code
 
         # Create choices from display names and their base codes
-        qualifier_choices = [(base_code, display_name) for display_name, base_code in sorted(display_name_to_base_code.items())]
-        
+        qualifier_choices = [
+            (base_code, display_name)
+            for display_name, base_code in sorted(display_name_to_base_code.items())
+        ]
+
         return qualifier_choices
