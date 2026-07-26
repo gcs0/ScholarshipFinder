@@ -31,12 +31,12 @@
                 
                 {% if scholarship.inquiry %}
                 <dt>Inquiry Method</dt>
-                <dd>{{ scholarship.inquiry }}</dd>
+                <dd class="text-clamp">{{ scholarship.inquiry|expand_inquiry_method }}</dd>
                 {% endif %}
                 
                 {% if scholarship.application %}
                 <dt>Application Method</dt>
-                <dd>{{ scholarship.application }}</dd>
+                <dd class="text-clamp">{{ scholarship.application|expand_application_method }}</dd>
                 {% endif %}
             </dl>
         </section>
@@ -61,7 +61,7 @@
                 
                 {% if scholarship.plural_grants %}
                 <dt>Multiple Grants Available</dt>
-                <dd>{{ scholarship.plural_grants }}</dd>
+                <dd>{{ scholarship.plural_grants|display_grants }}</dd>
                 {% endif %}
             </dl>
         </section>
@@ -76,7 +76,7 @@
                 
                 {% if scholarship.duration %}
                 <dt>Duration</dt>
-                <dd>{{ scholarship.duration }}</dd>
+                <dd>{{ scholarship.duration|expand_duration }}</dd>
                 {% endif %}
                 
                 {% if scholarship.application_period %}
@@ -86,7 +86,7 @@
                 
                 {% if scholarship.selection_method %}
                 <dt>Selection Method</dt>
-                <dd>{{ scholarship.selection_method }}</dd>
+                <dd>{{ scholarship.selection_method|expand_selection_method }}</dd>
                 {% endif %}
             </dl>
         </section>

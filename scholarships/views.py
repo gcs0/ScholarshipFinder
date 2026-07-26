@@ -1,3 +1,5 @@
+import re
+import logging
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -5,6 +7,8 @@ from django.contrib.auth.views import PasswordChangeDoneView, PasswordChangeView
 from django.core.management import call_command
 from django.shortcuts import redirect, render
 from django.utils import timezone
+
+logger = logging.getLogger(__name__)
 
 from .forms import (
     CustomLoginForm,
@@ -40,10 +44,38 @@ def scholarship_list(request):
         if data["qualifier"]:
             from django.db.models import Q
             qualifier_q = Q()
+            
             for code in data["qualifier"]:
-                qualifier_q |= Q(qualifier__icontains=code)
+                try:
+                    # Validate and sanitize the code before processing
+                    if not code or not isinstance(code, str):
+                        continue
+                    
+                    # Clean the code - remove any non-alphanumeric characters except parentheses and hyphens
+                    clean_code = re.sub(r'[^\w\(\)\-]', '', code).strip()
+                    if not clean_code:
+                        continue
+                    
+                    # Validate code format - only allow alphanumeric with optional parentheses
+                    if not re.match(r'^[A-Za-z]+(?:\d+)?(?:\([^)]*\))?$', clean_code):
+                        logger.warning(f"Invalid qualifier code format: '{code}'")
+                        continue
+                    
+                    # Use simple contains matching instead of complex regex
+                    # This avoids database regex engine issues
+                    qualifier_q |= Q(qualifier__icontains=clean_code)
+                    
+                except (re.error, ValueError, TypeError) as e:
+                    # Log the error for debugging but continue processing other codes
+                    logger.warning(f"Invalid qualifier code '{code}': {str(e)}")
+                    continue
+                except Exception as e:
+                    # Catch any other unexpected errors
+                    logger.error(f"Unexpected error processing qualifier code '{code}': {str(e)}")
+                    continue
 
-            scholarships = scholarships.filter(qualifier_q)
+            if qualifier_q:
+                scholarships = scholarships.filter(qualifier_q)
 
         # Filter by designated schools (partial match)
         if data["designated_schools"]:
@@ -62,15 +94,17 @@ def scholarship_list(request):
             scholarships = scholarships.filter(plural_grants=data["plural_grants"])
 
         # Filter by award amount range
-        if data["award_amount_min"] or data["award_amount_max"]:
-            import re
-
+        if data["award_amount_min"] is not None or data["award_amount_max"] is not None:
             from django.db.models import Q
 
             from .templatetags.scholarship_extras import extract_single_amount
 
-            min_amount = data["award_amount_min"] or 0
-            max_amount = data["award_amount_max"] or 1000000
+            min_amount = data["award_amount_min"] if data["award_amount_min"] is not None else 0
+            max_amount = data["award_amount_max"] if data["award_amount_max"] is not None else 600000
+            
+            # Validate amounts are within acceptable range
+            min_amount = max(0, min(min_amount, 600000))
+            max_amount = max(0, min(max_amount, 600000))
 
             matching_ids = []
             for scholarship in scholarships:

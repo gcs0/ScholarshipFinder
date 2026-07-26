@@ -1,3 +1,5 @@
+import re
+import re
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import (
@@ -6,6 +8,12 @@ from django.contrib.auth.forms import (
 )
 
 from .models import Scholarship, ScholarshipRequest, User
+
+# Import qualifier mapping for data cleaning
+try:
+    from .templatetags.scholarship_extras import QUALIFIER_MAPPING
+except ImportError:
+    QUALIFIER_MAPPING = {}
 
 User = get_user_model()
 
@@ -72,8 +80,8 @@ class ScholarshipFilterForm(forms.Form):
     designated_schools = forms.CharField(required=False, label="Designated Schools")
     designated_fields = forms.CharField(required=False, label="Fields of Study")
     plural_grants = forms.ChoiceField(choices=[], required=False, label="Multiple Grants")
-    award_amount_min = forms.IntegerField(required=False, min_value=0, max_value=1000000, label="Min Award (¥/month)")
-    award_amount_max = forms.IntegerField(required=False, min_value=0, max_value=1000000, label="Max Award (¥/month)")
+    award_amount_min = forms.IntegerField(required=False, min_value=0, max_value=600000, label="Min Award (¥/month)")
+    award_amount_max = forms.IntegerField(required=False, min_value=0, max_value=600000, label="Max Award (¥/month)")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -93,20 +101,34 @@ class ScholarshipFilterForm(forms.Form):
         self.fields["plural_grants"].choices = plural_grants_choices
 
     def _get_qualifier_choices(self):
-        all_qualifiers = set()
+        # Use a dictionary to track display names and their base codes
+        display_name_to_base_code = {}
+        
         for qualifier_str in Scholarship.objects.values_list("qualifier", flat=True).distinct():
             if qualifier_str:
-                codes = [code.strip() for code in qualifier_str.split('\n') if code.strip()]
-                all_qualifiers.update(codes)
+                # Clean and normalize the qualifier string
+                cleaned_str = qualifier_str.strip()
+                # Replace full-width characters with ASCII equivalents
+                cleaned_str = cleaned_str.replace('Ｍ', 'M').replace('Ｄ', 'D').replace('）', ')').replace('（', '(')
+                # Split by newlines and process each code
+                codes = [code.strip() for code in cleaned_str.split('\n') if code.strip()]
+                
+                for code in codes:
+                    # Extract base qualifier code (e.g., extract "U" from "U(2-3)" or "U2")
+                    # Only include codes that start with letters followed by optional digits
+                    if re.match(r'^[A-Za-z]+(?:\d+)?(?:\s*[\(,\-]|$)', code):
+                        # Extract the base code for mapping lookup
+                        base_code_match = re.match(r'^([A-Za-z]+)(?:\d+)?', code)
+                        if base_code_match:
+                            base_code = base_code_match.group(1)
+                            # Only use codes that exist in QUALIFIER_MAPPING
+                            if base_code in QUALIFIER_MAPPING:
+                                display_name = QUALIFIER_MAPPING[base_code]
+                                # Store the base code for this display name (first one wins)
+                                if display_name not in display_name_to_base_code:
+                                    display_name_to_base_code[display_name] = base_code
 
-        try:
-            from .templatetags.scholarship_extras import QUALIFIER_MAPPING
-        except ImportError:
-            QUALIFIER_MAPPING = {}
-
-        qualifier_choices = []
-        for code in sorted(all_qualifiers):
-            display_name = QUALIFIER_MAPPING.get(code, code)
-            qualifier_choices.append((code, f"{code} - {display_name}"))
-
+        # Create choices from display names and their base codes
+        qualifier_choices = [(base_code, display_name) for display_name, base_code in sorted(display_name_to_base_code.items())]
+        
         return qualifier_choices

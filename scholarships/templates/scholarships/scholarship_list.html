@@ -35,9 +35,12 @@
                 </div>
                 <div class="filter-field award-range-filter">
                     <label>Award Amount (¥/month)</label>
-                    <div class="range-slider-container">
-                        <input type="range" id="award-min" name="award_amount_min" min="0" max="600000" step="5000" value="0" class="range-slider">
-                        <input type="range" id="award-max" name="award_amount_max" min="0" max="600000" step="5000" value="600000" class="range-slider">
+                    <div class="dual-range-slider">
+                        <div class="slider-track">
+                            <div class="slider-track-fill" id="track-fill"></div>
+                        </div>
+                        <input type="range" id="award-min" name="award_amount_min" min="0" max="600000" step="5000" value="0" class="range-slider range-slider-min">
+                        <input type="range" id="award-max" name="award_amount_max" min="0" max="600000" step="5000" value="600000" class="range-slider range-slider-max">
                         <div class="range-values">
                             <span id="award-min-display">¥0</span>
                             <span id="award-max-display">¥600,000</span>
@@ -120,32 +123,53 @@ function toggleClamp(elementId) {
     }
 }
 
-// Initialize range slider and show/hide more buttons
+// Initialize dual range slider and show/hide more buttons
 document.addEventListener('DOMContentLoaded', function() {
-    // Award amount range slider
+    // Award amount dual range slider
     const minSlider = document.getElementById('award-min');
     const maxSlider = document.getElementById('award-max');
     const minDisplay = document.getElementById('award-min-display');
     const maxDisplay = document.getElementById('award-max-display');
+    const trackFill = document.getElementById('track-fill');
 
-    if (minSlider && maxSlider) {
+    if (minSlider && maxSlider && trackFill) {
         function updateSliderDisplay() {
             let minValue = parseInt(minSlider.value);
             let maxValue = parseInt(maxSlider.value);
 
-            // Ensure min doesn't exceed max
-            if (minValue > maxValue) {
-                const temp = minValue;
-                minValue = maxValue;
-                maxValue = temp;
+            // Prevent crossing by constraining values
+            if (minValue > maxValue - 5000) {
+                if (document.activeElement === minSlider) {
+                    minValue = maxValue - 5000;
+                    minSlider.value = minValue;
+                } else {
+                    maxValue = minValue + 5000;
+                    maxSlider.value = maxValue;
+                }
             }
 
+            // Update displays
             minDisplay.textContent = '¥' + minValue.toLocaleString();
             maxDisplay.textContent = '¥' + maxValue.toLocaleString();
+
+            // Update track fill
+            const percentMin = (minValue / 600000) * 100;
+            const percentMax = (maxValue / 600000) * 100;
+            trackFill.style.left = percentMin + '%';
+            trackFill.style.width = (percentMax - percentMin) + '%';
         }
 
         minSlider.addEventListener('input', updateSliderDisplay);
         maxSlider.addEventListener('input', updateSliderDisplay);
+        
+        // Initialize from URL parameters if present
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('award_amount_min')) {
+            minSlider.value = urlParams.get('award_amount_min');
+        }
+        if (urlParams.has('award_amount_max')) {
+            maxSlider.value = urlParams.get('award_amount_max');
+        }
         
         // Initial display update
         updateSliderDisplay();
