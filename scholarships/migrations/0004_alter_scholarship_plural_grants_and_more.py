@@ -53,7 +53,7 @@ def normalize_plural_grants(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("scholarships", "0003_scholarship_grant_amount_max_and_more"),
+        ("scholarships", "0002_scholarship_notes"),
     ]
 
     operations = [
