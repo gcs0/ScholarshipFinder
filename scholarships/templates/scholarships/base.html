@@ -5,13 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ScholarshipFinder{% endblock %}</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'scholarships/style.css' %}">
+    <script>document.documentElement.classList.add('js');</script>
+    <link rel="stylesheet" href="{% static 'scholarships/style.css' %}?v=20260726">
 </head>
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <header class="site-header">
-        <nav aria-label="Main navigation">
-            <ul class="nav-links">
+        <div class="header-inner">
+            <a class="site-brand" href="{% url 'home' %}">
+                <span class="brand-mark" aria-hidden="true">SF</span>
+                <span>ScholarshipFinder</span>
+            </a>
+            <button type="button" class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="primary-nav">
+                <span class="nav-toggle-icon" aria-hidden="true"></span>
+                <span class="nav-toggle-text">Menu</span>
+            </button>
+            <nav aria-label="Main navigation">
                 {% url 'home' as home_url %}
                 {% url 'scholarship-list' as list_url %}
                 {% url 'request-form' as request_url %}
@@ -19,21 +28,23 @@
                 {% url 'login' as login_url %}
                 {% url 'register' as register_url %}
                 {% url 'logout' as logout_url %}
-                <li><a href="{{ home_url }}" {% if request.path == home_url %}aria-current="page"{% endif %}>Home</a></li>
-                <li><a href="{{ list_url }}" {% if request.path == list_url %}aria-current="page"{% endif %}>Scholarships</a></li>
-                {% if user.is_authenticated %}
-                    <li><a href="{{ request_url }}" {% if request.path == request_url %}aria-current="page"{% endif %}>New Request</a></li>
-                    <li><a href="{{ profile_url }}" {% if request.path == profile_url %}aria-current="page"{% endif %}>Profile</a></li>
-                    <li><form method="post" action="{% url 'logout' %}">
-                        {% csrf_token %}
-                        <button type="submit">Logout</button>
-                    </form></li>
-                {% else %}
-                    <li><a href="{{ login_url }}" {% if request.path == login_url %}aria-current="page"{% endif %}>Login</a></li>
-                    <li><a href="{{ register_url }}" {% if request.path == register_url %}aria-current="page"{% endif %}>Register</a></li>
-                {% endif %}
-            </ul>
-        </nav>
+                <ul class="nav-links" id="primary-nav">
+                    <li><a href="{{ home_url }}" {% if request.path == home_url %}aria-current="page"{% endif %}>Home</a></li>
+                    <li><a href="{{ list_url }}" {% if request.path == list_url %}aria-current="page"{% endif %}>Scholarships</a></li>
+                    {% if user.is_authenticated %}
+                        <li><a href="{{ request_url }}" {% if request.path == request_url %}aria-current="page"{% endif %}>New Request</a></li>
+                        <li><a href="{{ profile_url }}" {% if request.path == profile_url %}aria-current="page"{% endif %}>Profile</a></li>
+                        <li><form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit">Logout</button>
+                        </form></li>
+                    {% else %}
+                        <li><a href="{{ login_url }}" {% if request.path == login_url %}aria-current="page"{% endif %}>Login</a></li>
+                        <li><a href="{{ register_url }}" {% if request.path == register_url %}aria-current="page"{% endif %}>Register</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
     </header>
     <main id="main-content" class="container">
         {% if messages %}
@@ -48,6 +59,35 @@
     <footer class="site-footer">
         <p>&copy; ScholarshipFinder</p>
     </footer>
+    <script>
+    (function() {
+        var toggle = document.getElementById('nav-toggle');
+        var nav = document.getElementById('primary-nav');
+        if (!toggle || !nav) return;
+
+        function setOpen(open) {
+            nav.classList.toggle('is-open', open);
+            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+
+        toggle.addEventListener('click', function () {
+            setOpen(!(nav.classList.contains('is-open')));
+        });
+
+        nav.addEventListener('click', function (e) {
+            if (e.target.tagName === 'A') {
+                setOpen(false);
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && nav.classList.contains('is-open')) {
+                setOpen(false);
+                toggle.focus();
+            }
+        });
+    })();
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

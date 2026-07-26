@@ -42,51 +42,43 @@ The repository SHALL include a `.gitignore` file excluding Python bytecode, virt
 - **THEN** it SHALL include entries for `__pycache__/` and `*.pyc`
 
 ### Requirement: Package skeleton
-The project SHALL contain a `src/scholarship_finder/` Python package with stub modules for the three core entities.
+The project SHALL contain a `scholarships/` Django app directory with `models.py` defining the three core entities as Django models.
 
-#### Scenario: Package directory exists
-- **WHEN** the `src/` directory is inspected
-- **THEN** a `src/scholarship_finder/` directory SHALL exist
+#### Scenario: App directory exists
+- **WHEN** the repository root is inspected
+- **THEN** a `scholarships/` directory SHALL exist
 
-#### Scenario: Package init exists
-- **WHEN** `src/scholarship_finder/` is inspected
-- **THEN** it SHALL contain an `__init__.py` file
+#### Scenario: Models file exists
+- **WHEN** `scholarships/` is inspected
+- **THEN** it SHALL contain a `models.py` file
 
-#### Scenario: User module stub
-- **WHEN** `src/scholarship_finder/` is inspected
-- **THEN** it SHALL contain a `user.py` module
+#### Scenario: User model defined
+- **WHEN** `scholarships/models.py` is inspected
+- **THEN** it SHALL define a `User` model class
 
-#### Scenario: Scholarship module stub
-- **WHEN** `src/scholarship_finder/` is inspected
-- **THEN** it SHALL contain a `scholarship.py` module
+#### Scenario: Scholarship model defined
+- **WHEN** `scholarships/models.py` is inspected
+- **THEN** it SHALL define a `Scholarship` model class
 
-#### Scenario: Scholarship request module stub
-- **WHEN** `src/scholarship_finder/` is inspected
-- **THEN** it SHALL contain a `scholarship_request.py` module
+#### Scenario: ScholarshipRequest model defined
+- **WHEN** `scholarships/models.py` is inspected
+- **THEN** it SHALL define a `ScholarshipRequest` model class
 
 ### Requirement: Test scaffolding
-The project SHALL include a `tests/` directory with a placeholder test file.
+The `scholarships` app SHALL include a `tests.py` file (created by `startapp`) with at least one test.
 
-#### Scenario: Tests directory exists
-- **WHEN** the project is inspected
-- **THEN** a `tests/` directory SHALL exist
+#### Scenario: Tests file exists
+- **WHEN** `scholarships/` is inspected
+- **THEN** it SHALL contain a `tests.py` file
 
-#### Scenario: Placeholder test exists
-- **WHEN** `tests/` is inspected
-- **THEN** it SHALL contain at least one Python test file
+#### Scenario: Import succeeds
+- **WHEN** `python -c "from scholarships.models import User, Scholarship, ScholarshipRequest"` is run
+- **THEN** it SHALL exit with code 0
 
 ### Requirement: Tooling commands pass
-The project SHALL be configured so that all tooling commands defined in AGENTS.md pass without errors.
+The project SHALL be configured so that `ruff check .` and `black --check .` pass, and Django system checks pass.
 
-#### Scenario: Linter passes on empty codebase
-- **WHEN** `ruff check .` is run from the repository root
+#### Scenario: Django system checks pass
+- **WHEN** `python manage.py check` is run
 - **THEN** it SHALL exit with code 0
-
-#### Scenario: Formatter check passes
-- **WHEN** `black --check .` is run from the repository root
-- **THEN** it SHALL exit with code 0
-
-#### Scenario: Tests can be collected
-- **WHEN** `pytest --collect-only` is run from the repository root
-- **THEN** it SHALL exit with code 0 and discover at least one test
 

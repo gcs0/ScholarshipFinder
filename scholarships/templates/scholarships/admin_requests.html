@@ -34,17 +34,17 @@
             <tbody>
                 {% for req in requests %}
                     <tr class="request-row">
-                        <td>{{ req.id }}</td>
-                        <td>{{ req.user.name }}</td>
-                        <td>{{ req.user.email }}</td>
-                        <td>{{ req.scholarship.scholarship_name }}</td>
-                        <td>
+                        <td data-label="ID">{{ req.id }}</td>
+                        <td data-label="User">{{ req.user.name }}</td>
+                        <td data-label="Email">{{ req.user.email }}</td>
+                        <td data-label="Scholarship">{{ req.scholarship.scholarship_name }}</td>
+                        <td data-label="Status">
                             <span class="status-badge status-{{ req.status }}">
                                 {{ req.status|title }}
                             </span>
                         </td>
-                        <td>{{ req.created_at|date:"M d, Y H:i" }}</td>
-                        <td>
+                        <td data-label="Submitted">{{ req.created_at|date:"M d, Y H:i" }}</td>
+                        <td data-label="Actions">
                             <a href="{% url 'admin-request-detail' req.id %}" class="button small">Review</a>
                         </td>
                     </tr>

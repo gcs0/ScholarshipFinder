@@ -70,15 +70,15 @@
                 <tbody>
                     {% for s in scholarships %}
                         <tr>
-                            <td><span class="section-badge">{{ s.section|get_section_display }}</span></td>
-                            <td>{{ s.foundation_name }}</td>
-                            <td><a href="{% url 'scholarship-detail' s.pk %}">{{ s.scholarship_name }}</a></td>
-                            <td><div class="text-clamp" id="qualifier-{{ s.pk }}">{{ s.qualifier|expand_qualifier }}</div><button class="clamp-toggle" onclick="toggleClamp('qualifier-{{ s.pk }}')" data-target="qualifier-{{ s.pk }}">Show more</button></td>
-                            <td><div class="text-clamp" id="schools-{{ s.pk }}">{{ s.designated_schools }}</div><button class="clamp-toggle" onclick="toggleClamp('schools-{{ s.pk }}')" data-target="schools-{{ s.pk }}">Show more</button></td>
-                            <td><div class="text-clamp" id="fields-{{ s.pk }}">{{ s.designated_fields }}</div><button class="clamp-toggle" onclick="toggleClamp('fields-{{ s.pk }}')" data-target="fields-{{ s.pk }}">Show more</button></td>
-                            <td>{{ s.plural_grants|display_grants }}</td>
-                            <td>{{ s.contents|transform_award_amount }}</td>
-                            <td><div class="text-clamp" id="period-{{ s.pk }}">{{ s.application_period }}</div><button class="clamp-toggle" onclick="toggleClamp('period-{{ s.pk }}')" data-target="period-{{ s.pk }}">Show more</button></td>
+                            <td data-label="Type"><span class="section-badge">{{ s.section|get_section_display }}</span></td>
+                            <td data-label="Foundation">{{ s.foundation_name }}</td>
+                            <td data-label="Scholarship Name"><a href="{% url 'scholarship-detail' s.pk %}">{{ s.scholarship_name }}</a></td>
+                            <td data-label="Qualifier"><div class="text-clamp" id="qualifier-{{ s.pk }}">{{ s.qualifier|expand_qualifier }}</div><button class="clamp-toggle" onclick="toggleClamp('qualifier-{{ s.pk }}')" data-target="qualifier-{{ s.pk }}">Show more</button></td>
+                            <td data-label="Schools"><div class="text-clamp" id="schools-{{ s.pk }}">{{ s.designated_schools }}</div><button class="clamp-toggle" onclick="toggleClamp('schools-{{ s.pk }}')" data-target="schools-{{ s.pk }}">Show more</button></td>
+                            <td data-label="Fields"><div class="text-clamp" id="fields-{{ s.pk }}">{{ s.designated_fields }}</div><button class="clamp-toggle" onclick="toggleClamp('fields-{{ s.pk }}')" data-target="fields-{{ s.pk }}">Show more</button></td>
+                            <td data-label="Grants">{{ s.plural_grants|display_grants }}</td>
+                            <td data-label="Award">{{ s.contents|transform_award_amount }}</td>
+                            <td data-label="App Period"><div class="text-clamp" id="period-{{ s.pk }}">{{ s.application_period }}</div><button class="clamp-toggle" onclick="toggleClamp('period-{{ s.pk }}')" data-target="period-{{ s.pk }}">Show more</button></td>
                         </tr>
                     {% endfor %}
                 </tbody>

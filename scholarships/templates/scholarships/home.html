@@ -3,16 +3,18 @@
 {% block title %}Home — ScholarshipFinder{% endblock %}
 
 {% block content %}
-    <h1>Welcome to ScholarshipFinder</h1>
-    <p>Discover scholarships and submit requests for ones not yet listed.</p>
-    <nav aria-label="Quick actions">
-        <ul>
-            <li><a href="{% url 'scholarship-list' %}">Browse Scholarships</a></li>
-            {% if user.is_authenticated %}
-                <li><a href="{% url 'scholarship-list' %}">Submit a Scholarship Request</a></li>
-            {% else %}
-                <li><a href="{% url 'register' %}">Register to Submit Requests</a></li>
-            {% endif %}
-        </ul>
-    </nav>
+    <section class="hero">
+        <h1>Find the right scholarship for you</h1>
+        <p>Browse available scholarships and submit requests for ones not yet listed — all in one place.</p>
+        <nav aria-label="Quick actions">
+            <ul class="hero-actions">
+                <li><a href="{% url 'scholarship-list' %}" class="button primary-action">Browse Scholarships</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'scholarship-list' %}" class="button">Submit a Scholarship Request</a></li>
+                {% else %}
+                    <li><a href="{% url 'register' %}" class="button">Register to Submit Requests</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </section>
 {% endblock %}

@@ -42,15 +42,15 @@
                 <tbody>
                     {% for req in recent_requests %}
                         <tr>
-                            <td>{{ req.user.name }}</td>
-                            <td>{{ req.scholarship.scholarship_name }}</td>
-                            <td>
+                            <td data-label="User">{{ req.user.name }}</td>
+                            <td data-label="Scholarship">{{ req.scholarship.scholarship_name }}</td>
+                            <td data-label="Status">
                                 <span class="status-badge status-{{ req.status }}">
                                     {{ req.status|title }}
                                 </span>
                             </td>
-                            <td>{{ req.created_at|date:"M d, Y" }}</td>
-                            <td>
+                            <td data-label="Date">{{ req.created_at|date:"M d, Y" }}</td>
+                            <td data-label="Action">
                                 <a href="{% url 'admin-request-detail' req.id %}">Review</a>
                             </td>
                         </tr>
