@@ -85,10 +85,22 @@
                     <dd>{{ request_obj.status|title }}</dd>
                     
                     <dt>Reviewed By</dt>
-                    <dd>{{ request_obj.reviewed_by.name if request_obj.reviewed_by else 'N/A' }}</dd>
+                    <dd>
+                        {% if request_obj.reviewed_by %}
+                            {{ request_obj.reviewed_by.name }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </dd>
                     
                     <dt>Reviewed Date</dt>
-                    <dd>{{ request_obj.reviewed_date|date:"F d, Y H:i" if request_obj.reviewed_date else 'N/A' }}</dd>
+                    <dd>
+                        {% if request_obj.reviewed_date %}
+                            {{ request_obj.reviewed_date|date:"F d, Y H:i" }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </dd>
                     
                     {% if request_obj.admin_notes %}
                     <dt>Admin Notes</dt>

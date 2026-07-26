@@ -188,3 +188,18 @@ class AdminReviewTests(TestCase):
         self.assertEqual(Scholarship.objects.count(), count)
         self.req.refresh_from_db()
         self.assertEqual(self.req.created_scholarship_id, first.id)
+
+    def test_detail_page_renders_for_pending_request(self):
+        self.client.login(username="admin@example.com", password="admin-pass-123")
+        response = self.client.get(reverse("admin-request-detail", args=[self.req.pk]))
+        self.assertEqual(response.status_code, 200)
+
+    def test_detail_page_renders_for_reviewed_request(self):
+        self.client.login(username="admin@example.com", password="admin-pass-123")
+        self.client.post(
+            reverse("admin-request-detail", args=[self.req.pk]),
+            data={"action": "approve", "admin_notes": "ok"},
+        )
+        response = self.client.get(reverse("admin-request-detail", args=[self.req.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.admin.name)
