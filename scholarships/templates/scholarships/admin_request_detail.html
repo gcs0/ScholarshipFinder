@@ -12,36 +12,47 @@
     
     <div class="request-review-content">
         <section class="request-details">
-            <h2>Request Information</h2>
+            <h2>Submission Information</h2>
             <dl class="detail-list">
                 <dt>User</dt>
                 <dd>{{ request_obj.user.name }} ({{ request_obj.user.email }})</dd>
-                
+
                 <dt>User Education</dt>
                 <dd>{{ request_obj.user.education }}</dd>
-                
+
                 <dt>User Discipline</dt>
                 <dd>{{ request_obj.user.discipline }}</dd>
-                
+
                 <dt>Submitted</dt>
                 <dd>{{ request_obj.created_at|date:"F d, Y H:i" }}</dd>
             </dl>
         </section>
-        
+
         <section class="scholarship-details">
-            <h2>Scholarship Information</h2>
+            <h2>Suggested Scholarship</h2>
             <dl class="detail-list">
                 <dt>Scholarship Name</dt>
-                <dd>{{ request_obj.scholarship.scholarship_name }}</dd>
-                
-                <dt>Foundation</dt>
-                <dd>{{ request_obj.scholarship.foundation_name }}</dd>
-                
-                <dt>Type</dt>
-                <dd>{{ request_obj.scholarship.section }}</dd>
-                
-                <dt>Contents (Award)</dt>
-                <dd>{{ request_obj.scholarship.contents }}</dd>
+                <dd>{{ request_obj.scholarship_name }}</dd>
+
+                <dt>Provider</dt>
+                <dd>{{ request_obj.provider }}</dd>
+
+                <dt>Award Amount</dt>
+                <dd>{{ request_obj.award_amount|default:"—" }}</dd>
+
+                {% if request_obj.notes %}
+                <dt>Submitter Notes</dt>
+                <dd>{{ request_obj.notes }}</dd>
+                {% endif %}
+
+                {% if request_obj.created_scholarship %}
+                <dt>Created Scholarship</dt>
+                <dd>
+                    <a href="{% url 'scholarship-detail' request_obj.created_scholarship.id %}">
+                        {{ request_obj.created_scholarship.scholarship_name }}
+                    </a>
+                </dd>
+                {% endif %}
             </dl>
         </section>
         

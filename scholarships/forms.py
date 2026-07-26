@@ -75,12 +75,22 @@ class CustomLoginForm(AuthenticationForm):
 class ScholarshipRequestForm(forms.ModelForm):
     class Meta:
         model = ScholarshipRequest
-        fields = ["scholarship"]
-        widgets = {"notes": forms.Textarea(attrs={"rows": 4})}
+        fields = ["scholarship_name", "provider", "award_amount", "notes"]
+        widgets = {
+            "award_amount": forms.TextInput(
+                attrs={"placeholder": "e.g., 50,000 JPY/month"}
+            ),
+            "notes": forms.Textarea(attrs={"rows": 4}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["scholarship"].widget.attrs.update({"class": "form-select"})
+        self.fields["scholarship_name"].widget.attrs.update(
+            {"placeholder": "Name of the scholarship to add"}
+        )
+        self.fields["provider"].widget.attrs.update(
+            {"placeholder": "Foundation or organization offering it"}
+        )
 
 
 class ScholarshipFilterForm(forms.Form):

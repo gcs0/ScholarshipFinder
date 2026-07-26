@@ -1,10 +1,10 @@
 {% extends "scholarships/base.html" %}
 
-{% block title %}Admin Requests — ScholarshipFinder{% endblock %}
+{% block title %}Admin Submissions — ScholarshipFinder{% endblock %}
 
 {% block content %}
-    <h1>Manage Scholarship Requests</h1>
-    
+    <h1>Manage Scholarship Submissions</h1>
+
     <div class="filter-controls">
         <form method="get" class="filter-form">
             <label for="status">Filter by Status:</label>
@@ -17,7 +17,7 @@
             <button type="submit" class="button">Filter</button>
         </form>
     </div>
-    
+
     {% if requests %}
         <table class="admin-table">
             <thead>
@@ -26,6 +26,7 @@
                     <th>User</th>
                     <th>Email</th>
                     <th>Scholarship</th>
+                    <th>Provider</th>
                     <th>Status</th>
                     <th>Submitted</th>
                     <th>Actions</th>
@@ -37,7 +38,8 @@
                         <td data-label="ID">{{ req.id }}</td>
                         <td data-label="User">{{ req.user.name }}</td>
                         <td data-label="Email">{{ req.user.email }}</td>
-                        <td data-label="Scholarship">{{ req.scholarship.scholarship_name }}</td>
+                        <td data-label="Scholarship">{{ req.scholarship_name }}</td>
+                        <td data-label="Provider">{{ req.provider }}</td>
                         <td data-label="Status">
                             <span class="status-badge status-{{ req.status }}">
                                 {{ req.status|title }}
@@ -52,9 +54,9 @@
             </tbody>
         </table>
     {% else %}
-        <p>No requests found.</p>
+        <p>No submissions found.</p>
     {% endif %}
-    
+
     <div class="back-link">
         <a href="{% url 'admin-dashboard' %}" class="button">Back to Dashboard</a>
     </div>

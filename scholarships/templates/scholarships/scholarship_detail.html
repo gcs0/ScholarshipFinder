@@ -123,9 +123,9 @@
 
         <section class="detail-actions">
             {% if user.is_authenticated %}
-                <a href="{% url 'request-form' scholarship.id %}" class="button">Request This Scholarship</a>
+                <a href="{% url 'request-form' %}" class="button">Suggest a Scholarship</a>
             {% else %}
-                <a href="{% url 'login' %}?next={% url 'request-form' scholarship.id %}" class="button">Login to Request</a>
+                <a href="{% url 'login' %}?next={% url 'request-form' %}" class="button">Login to Suggest a Scholarship</a>
             {% endif %}
             <a href="{% url 'scholarship-list' %}" class="button">Back to List</a>
         </section>

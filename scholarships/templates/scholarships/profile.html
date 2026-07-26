@@ -11,32 +11,35 @@
     <p><strong>Prefecture:</strong> {{ user.prefecture|default:"Not specified" }}</p>
 </div>
 
-<h2>Your Scholarship Requests</h2>
+<h2>Your Scholarship Submissions</h2>
 {% if user_requests %}
     <div class="request-list">
         {% for request in user_requests %}
             <div class="request-item">
                 <div class="request-header">
-                    <h3>{{ request.scholarship.scholarship_name }}</h3>
+                    <h3>{{ request.scholarship_name }}</h3>
                     <span class="status-badge status-{{ request.status }}">
                         {{ request.status|title }}
                     </span>
                 </div>
-                
+
                 <div class="request-details">
-                    <p><strong>Foundation:</strong> {{ request.scholarship.foundation_name }}</p>
+                    <p><strong>Provider:</strong> {{ request.provider }}</p>
                     <p><strong>Submitted:</strong> {{ request.created_at|date:"F d, Y H:i" }}</p>
-                    {% if request.scholarship.contents %}
-                    <p><strong>Award:</strong> {{ request.scholarship.contents }}</p>
+                    {% if request.award_amount %}
+                    <p><strong>Award:</strong> {{ request.award_amount }}</p>
+                    {% endif %}
+                    {% if request.notes %}
+                    <p><strong>Notes:</strong> {{ request.notes }}</p>
                     {% endif %}
                 </div>
-                
+
                 {% if request.admin_notes %}
                 <div class="admin-notes">
                     <strong>Admin Notes:</strong> {{ request.admin_notes }}
                 </div>
                 {% endif %}
-                
+
                 {% if request.reviewed_date %}
                 <p><small>Reviewed: {{ request.reviewed_date|date:"F d, Y H:i" }}</small></p>
                 {% endif %}
@@ -44,7 +47,8 @@
         {% endfor %}
     </div>
 {% else %}
-    <p>You haven't submitted any scholarship requests yet.</p>
+    <p>You haven't submitted any scholarship suggestions yet.</p>
+    <a href="{% url 'request-form' %}" class="button">Suggest a Scholarship</a>
     <a href="{% url 'scholarship-list' %}" class="button">Browse Scholarships</a>
 {% endif %}
 

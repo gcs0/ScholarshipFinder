@@ -1,52 +1,71 @@
 {% extends "scholarships/base.html" %}
 
-{% block title %}Request Scholarship — ScholarshipFinder{% endblock %}
+{% block title %}Suggest a Scholarship — ScholarshipFinder{% endblock %}
 
 {% block content %}
-    <h1>Request Scholarship</h1>
-    
-    <div class="scholarship-preview">
-        <h2>{{ scholarship.scholarship_name }}</h2>
-        <p><strong>Foundation:</strong> {{ scholarship.foundation_name }}</p>
-        <p><strong>Type:</strong> {{ scholarship.section }}</p>
-        {% if scholarship.contents %}
-        <p><strong>Award:</strong> {{ scholarship.contents }}</p>
-        {% endif %}
-    </div>
-    
+    <h1>Suggest a New Scholarship</h1>
+
+    <p>
+        Know of a scholarship that isn't listed yet?
+        Submit the details below and an admin will review it for inclusion.
+    </p>
+
     <div class="request-form-container">
-        <h2>Submit Your Request</h2>
-        
         <form method="post">
             {% csrf_token %}
-            
+
             <div class="user-info-summary">
                 <h3>Your Information</h3>
                 <p><strong>Name:</strong> {{ user.name }}</p>
                 <p><strong>Email:</strong> {{ user.email }}</p>
-                <p><strong>Education:</strong> {{ user.education|default:"Not specified" }}</p>
-                <p><strong>Discipline:</strong> {{ user.discipline|default:"Not specified" }}</p>
             </div>
-            
+
             <div class="form-field">
-                <label for="id_scholarship">Scholarship:</label>
-                <input type="text" id="id_scholarship" value="{{ scholarship.scholarship_name }}" readonly>
+                <label for="{{ form.scholarship_name.id_for_label }}">{{ form.scholarship_name.label }}</label>
+                {{ form.scholarship_name }}
+                {% if form.scholarship_name.errors %}
+                    <div class="form-errors">{{ form.scholarship_name.errors }}</div>
+                {% endif %}
             </div>
-            
+
+            <div class="form-field">
+                <label for="{{ form.provider.id_for_label }}">{{ form.provider.label }}</label>
+                {{ form.provider }}
+                {% if form.provider.errors %}
+                    <div class="form-errors">{{ form.provider.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-field">
+                <label for="{{ form.award_amount.id_for_label }}">{{ form.award_amount.label }}</label>
+                {{ form.award_amount }}
+                {% if form.award_amount.errors %}
+                    <div class="form-errors">{{ form.award_amount.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-field">
+                <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                    <div class="form-errors">{{ form.notes.errors }}</div>
+                {% endif %}
+            </div>
+
             <div class="form-actions">
-                <button type="submit" class="button">Submit Request</button>
-                <a href="{% url 'scholarship-detail' scholarship.id %}" class="button">Cancel</a>
+                <button type="submit" class="button">Submit Suggestion</button>
+                <a href="{% url 'profile' %}" class="button">Cancel</a>
             </div>
         </form>
     </div>
-    
+
     <div class="request-info">
-        <h3>Request Process</h3>
+        <h3>Review Process</h3>
         <ol>
-            <li>Your request will be submitted as <strong>Pending</strong></li>
-            <li>Admin staff will review your request</li>
-            <li>You'll be notified when a decision is made</li>
-            <li>Check your profile for request status updates</li>
+            <li>Your suggestion will be submitted as <strong>Pending</strong></li>
+            <li>Admin staff will review it for inclusion in the listing</li>
+            <li>On approval, the scholarship will be added to the system</li>
+            <li>Check your profile for status updates</li>
         </ol>
     </div>
 {% endblock %}

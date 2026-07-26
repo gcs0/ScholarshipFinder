@@ -251,41 +251,28 @@ def scholarship_detail(request, pk):
 
 
 @login_required
-def request_form(request, scholarship_id):
-    scholarship = Scholarship.objects.get(pk=scholarship_id)
-
-    # Check if user already has a pending request for this scholarship
-    existing_request = ScholarshipRequest.objects.filter(
-        user=request.user, scholarship=scholarship, status="pending"
-    ).first()
-
-    if existing_request:
-        messages.warning(
-            request, "You already have a pending request for this scholarship."
-        )
-        return redirect("scholarship-detail", pk=scholarship_id)
-
+def request_form(request):
     if request.method == "POST":
         form = ScholarshipRequestForm(request.POST)
         if form.is_valid():
             request_obj = form.save(commit=False)
             request_obj.user = request.user
-            request_obj.scholarship = scholarship
             request_obj.status = "pending"
             request_obj.save()
             messages.success(
                 request,
-                "Your scholarship request has been submitted and is pending admin approval!",
+                "Your suggestion to add a scholarship has been submitted and is "
+                "pending admin review!",
             )
-            return redirect("profile")
+            return render(
+                request,
+                "scholarships/request_success.html",
+                {"request_obj": request_obj},
+            )
     else:
-        form = ScholarshipRequestForm(initial={"scholarship": scholarship})
+        form = ScholarshipRequestForm()
 
-    return render(
-        request,
-        "scholarships/request_form.html",
-        {"form": form, "scholarship": scholarship},
-    )
+    return render(request, "scholarships/request_form.html", {"form": form})
 
 
 def register(request):
@@ -389,7 +376,19 @@ def admin_request_detail(request, pk):
         admin_notes = request.POST.get("admin_notes", "")
 
         if action in ["approve", "reject"]:
-            request_obj.status = "approved" if action == "approve" else "rejected"
+            if action == "approve":
+                if request_obj.status != "approved":
+                    scholarship = Scholarship.objects.create(
+                        section="IV",
+                        foundation_name=request_obj.provider,
+                        scholarship_name=request_obj.scholarship_name,
+                        contents=request_obj.award_amount,
+                    )
+                    request_obj.created_scholarship = scholarship
+                request_obj.status = "approved"
+            else:
+                request_obj.status = "rejected"
+
             request_obj.admin_notes = admin_notes
             request_obj.reviewed_by = request.user
             request_obj.reviewed_date = timezone.now()

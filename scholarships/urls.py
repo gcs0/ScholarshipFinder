@@ -10,11 +10,7 @@ urlpatterns = [
         views.scholarship_detail,
         name="scholarship-detail",
     ),
-    path(
-        "scholarships/<int:scholarship_id>/request/",
-        views.request_form,
-        name="request-form",
-    ),
+    path("request/", views.request_form, name="request-form"),
     path("register/", views.register, name="register"),
     path("login/", views.user_login, name="login"),
     path("logout/", views.user_logout, name="logout"),

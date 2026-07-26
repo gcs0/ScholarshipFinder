@@ -49,17 +49,28 @@ class ScholarshipAdmin(admin.ModelAdmin):
 
 
 class ScholarshipRequestAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'scholarship', 'status', 'created_at', 'reviewed_by')
+    list_display = (
+        'id',
+        'user',
+        'scholarship_name',
+        'provider',
+        'status',
+        'created_at',
+        'reviewed_by',
+    )
     list_filter = ('status', 'created_at', 'reviewed_date')
-    search_fields = ('user__name', 'user__email', 'scholarship__scholarship_name')
+    search_fields = ('user__name', 'user__email', 'scholarship_name', 'provider')
     readonly_fields = ('created_at', 'updated_at')
 
     fieldsets = (
-        ('Request Information', {
-            'fields': ('user', 'scholarship', 'status')
+        ('Submission Information', {
+            'fields': ('user', 'scholarship_name', 'provider', 'award_amount', 'notes')
         }),
         ('Review', {
-            'fields': ('admin_notes', 'reviewed_by', 'reviewed_date')
+            'fields': (
+                'status', 'admin_notes', 'reviewed_by', 'reviewed_date',
+                'created_scholarship',
+            )
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at')
@@ -69,12 +80,30 @@ class ScholarshipRequestAdmin(admin.ModelAdmin):
     actions = ['approve_requests', 'reject_requests']
 
     def approve_requests(self, request, queryset):
-        updated = queryset.update(status='approved', reviewed_by=request.user, reviewed_date=timezone.now())
-        self.message_user(request, f'{updated} requests successfully approved.')
+        for req in queryset:
+            if req.status != 'approved':
+                scholarship = Scholarship.objects.create(
+                    section='IV',
+                    foundation_name=req.provider,
+                    scholarship_name=req.scholarship_name,
+                    contents=req.award_amount,
+                )
+                req.created_scholarship = scholarship
+                req.status = 'approved'
+                req.reviewed_by = request.user
+                req.reviewed_date = timezone.now()
+                req.save(update_fields=[
+                    'created_scholarship', 'status', 'reviewed_by', 'reviewed_date',
+                ])
+        self.message_user(request, 'Selected requests successfully approved.')
     approve_requests.short_description = "Approve selected requests"
 
     def reject_requests(self, request, queryset):
-        updated = queryset.update(status='rejected', reviewed_by=request.user, reviewed_date=timezone.now())
+        updated = queryset.update(
+            status='rejected',
+            reviewed_by=request.user,
+            reviewed_date=timezone.now(),
+        )
         self.message_user(request, f'{updated} requests successfully rejected.')
     reject_requests.short_description = "Reject selected requests"
 

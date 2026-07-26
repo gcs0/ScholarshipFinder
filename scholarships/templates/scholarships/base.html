@@ -32,7 +32,7 @@
                     <li><a href="{{ home_url }}" {% if request.path == home_url %}aria-current="page"{% endif %}>Home</a></li>
                     <li><a href="{{ list_url }}" {% if request.path == list_url %}aria-current="page"{% endif %}>Scholarships</a></li>
                     {% if user.is_authenticated %}
-                        <li><a href="{{ request_url }}" {% if request.path == request_url %}aria-current="page"{% endif %}>New Request</a></li>
+                        <li><a href="{{ request_url }}" {% if request.path == request_url %}aria-current="page"{% endif %}>Suggest a Scholarship</a></li>
                         <li><a href="{{ profile_url }}" {% if request.path == profile_url %}aria-current="page"{% endif %}>Profile</a></li>
                         <li><form method="post" action="{% url 'logout' %}">
                             {% csrf_token %}

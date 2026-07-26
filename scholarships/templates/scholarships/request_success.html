@@ -1,11 +1,18 @@
 {% extends "scholarships/base.html" %}
 
-{% block title %}Request Submitted — ScholarshipFinder{% endblock %}
+{% block title %}Suggestion Submitted — ScholarshipFinder{% endblock %}
 
 {% block content %}
     <section>
-        <h1>Request Submitted</h1>
-        <p>Your scholarship request for <strong>{{ request_obj.scholarship_name }}</strong> has been submitted.</p>
-        <p><a href="{% url 'scholarship-list' %}" class="button">Browse Scholarships</a></p>
+        <h1>Suggestion Submitted</h1>
+        <p>
+            Your suggestion to add the scholarship
+            <strong>{{ request_obj.scholarship_name }}</strong>
+            has been submitted and is pending admin review.
+        </p>
+        <p>
+            <a href="{% url 'profile' %}" class="button">View My Submissions</a>
+            <a href="{% url 'scholarship-list' %}" class="button">Browse Scholarships</a>
+        </p>
     </section>
 {% endblock %}
