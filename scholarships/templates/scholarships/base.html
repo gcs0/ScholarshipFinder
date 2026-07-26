@@ -13,7 +13,7 @@
     <header class="site-header">
         <div class="header-inner">
             <a class="site-brand" href="{% url 'home' %}">
-                <span class="brand-mark" aria-hidden="true">SF</span>
+                <img src="{% static 'scholarships/logo.png' %}" alt="JTOB" class="brand-logo">
                 <span>ScholarshipFinder</span>
             </a>
             <button type="button" class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="primary-nav">
@@ -57,7 +57,8 @@
         {% block content %}{% endblock %}
     </main>
     <footer class="site-footer">
-        <p>&copy; ScholarshipFinder</p>
+        <p>&copy; JTOB (Turkish Students' Association in Japan)</p>
+        <p class="footer-tagline">Brought to you by the Turkish Students' Association in Japan</p>
     </footer>
     <script>
     (function() {

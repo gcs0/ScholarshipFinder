@@ -222,6 +222,12 @@ main.container {
     color: var(--brand-700);
 }
 
+.site-brand .brand-logo {
+    height: 2rem;
+    width: auto;
+    border-radius: var(--radius);
+}
+
 .site-brand .brand-mark {
     display: inline-flex;
     align-items: center;
@@ -365,6 +371,12 @@ main.container {
 }
 
 .site-footer a {
+    color: var(--text-muted);
+}
+
+.footer-tagline {
+    margin-top: var(--space-1);
+    font-size: var(--text-xs);
     color: var(--text-muted);
 }
 
@@ -656,6 +668,15 @@ form textarea:focus {
 
 .hero h1 {
     margin-bottom: var(--space-3);
+}
+
+.hero-sub {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--brand-600);
+    margin-bottom: var(--space-2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .hero p {
