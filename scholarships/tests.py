@@ -132,3 +132,59 @@ class AdminReviewTests(TestCase):
         self.assertIsNone(self.req.created_scholarship)
         self.assertEqual(Scholarship.objects.count(), before_count)
         self.assertEqual(self.req.admin_notes, "Not eligible")
+
+    def test_approve_links_existing_scholarship_on_duplicate(self):
+        self.client.login(username="admin@example.com", password="admin-pass-123")
+        existing = Scholarship.objects.create(
+            section="IV",
+            foundation_name=self.req.provider,
+            scholarship_name=self.req.scholarship_name,
+        )
+        before_count = Scholarship.objects.count()
+
+        response = self.client.post(
+            reverse("admin-request-detail", args=[self.req.pk]),
+            data={"action": "approve", "admin_notes": "Already listed"},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Scholarship.objects.count(), before_count)
+        self.req.refresh_from_db()
+        self.assertEqual(self.req.status, "approved")
+        self.assertEqual(self.req.created_scholarship, existing)
+        self.assertEqual(self.req.reviewed_by, self.admin)
+
+    def test_review_unknown_request_returns_404(self):
+        self.client.login(username="admin@example.com", password="admin-pass-123")
+        missing_pk = 999999
+
+        response_get = self.client.get(
+            reverse("admin-request-detail", args=[missing_pk])
+        )
+        self.assertEqual(response_get.status_code, 404)
+
+        response_post = self.client.post(
+            reverse("admin-request-detail", args=[missing_pk]),
+            data={"action": "approve"},
+        )
+        self.assertEqual(response_post.status_code, 404)
+
+    def test_re_approve_keeps_same_created_scholarship(self):
+        self.client.login(username="admin@example.com", password="admin-pass-123")
+        self.client.post(
+            reverse("admin-request-detail", args=[self.req.pk]),
+            data={"action": "approve"},
+        )
+        self.req.refresh_from_db()
+        first = self.req.created_scholarship
+        self.assertIsNotNone(first)
+        count = Scholarship.objects.count()
+
+        self.client.post(
+            reverse("admin-request-detail", args=[self.req.pk]),
+            data={"action": "approve"},
+        )
+
+        self.assertEqual(Scholarship.objects.count(), count)
+        self.req.refresh_from_db()
+        self.assertEqual(self.req.created_scholarship_id, first.id)

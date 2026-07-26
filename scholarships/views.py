@@ -5,7 +5,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import PasswordChangeDoneView, PasswordChangeView
 from django.core.management import call_command
-from django.shortcuts import redirect, render
+from django.db import transaction
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -369,33 +370,45 @@ def admin_requests(request):
 
 @user_passes_test(lambda u: u.is_superuser)
 def admin_request_detail(request, pk):
-    request_obj = ScholarshipRequest.objects.get(pk=pk)
+    request_obj = get_object_or_404(ScholarshipRequest, pk=pk)
 
     if request.method == "POST":
         action = request.POST.get("action")
         admin_notes = request.POST.get("admin_notes", "")
 
         if action in ["approve", "reject"]:
-            if action == "approve":
-                if request_obj.status != "approved":
-                    scholarship = Scholarship.objects.create(
-                        section="IV",
-                        foundation_name=request_obj.provider,
-                        scholarship_name=request_obj.scholarship_name,
-                        contents=request_obj.award_amount,
-                    )
-                    request_obj.created_scholarship = scholarship
-                request_obj.status = "approved"
+            linked_existing = False
+            with transaction.atomic():
+                if action == "approve":
+                    if request_obj.status != "approved":
+                        scholarship, created = Scholarship.objects.get_or_create(
+                            foundation_name=request_obj.provider,
+                            scholarship_name=request_obj.scholarship_name,
+                            defaults={
+                                "section": "IV",
+                                "contents": request_obj.award_amount,
+                            },
+                        )
+                        request_obj.created_scholarship = scholarship
+                        linked_existing = not created
+                    request_obj.status = "approved"
+                else:
+                    request_obj.status = "rejected"
+
+                request_obj.admin_notes = admin_notes
+                request_obj.reviewed_by = request.user
+                request_obj.reviewed_date = timezone.now()
+                request_obj.save()
+
+            if action == "approve" and linked_existing:
+                messages.info(
+                    request,
+                    "An existing scholarship with this name and provider was "
+                    "linked to the request.",
+                )
             else:
-                request_obj.status = "rejected"
-
-            request_obj.admin_notes = admin_notes
-            request_obj.reviewed_by = request.user
-            request_obj.reviewed_date = timezone.now()
-            request_obj.save()
-
-            action_text = "approved" if action == "approve" else "rejected"
-            messages.success(request, f"Request {action_text} successfully.")
+                action_text = "approved" if action == "approve" else "rejected"
+                messages.success(request, f"Request {action_text} successfully.")
             return redirect("admin-requests")
 
     return render(
