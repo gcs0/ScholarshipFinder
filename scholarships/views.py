@@ -19,6 +19,88 @@ from .forms import (
 from .models import Scholarship, ScholarshipRequest
 
 
+def extract_max_award_value(contents):
+    """
+    Extract the maximum award value from contents.
+    For ranges (e.g., "25-41,000"), use the MAXIMUM value.
+    Returns monthly value as integer, or None if parsing fails.
+    """
+    if not contents:
+        return None
+    
+    try:
+        contents = str(contents).strip()
+        
+        # Normalize full-width characters and hyphens
+        contents = contents.replace('Ｍ', 'M').replace('Ｄ', 'D').replace('／', '/')
+        contents = contents.replace('−', '-').replace('ー', '-')
+        
+        # Find all amount patterns with their time units
+        # Pattern: number(s) + optional range + optional time unit
+        amount_pattern = r'(\d[\d,]*)(?:\s*[-−ー]\s*(\d[\d,]*))?\s*(?:/|／)?([YMymy年月])?'
+        matches = re.findall(amount_pattern, contents, re.IGNORECASE)
+        
+        max_monthly_value = 0
+        
+        for match in matches:
+            part1, part2, time_unit = match
+            
+            # Clean numbers (remove commas)
+            part1_clean = part1.replace(',', '') if part1 else '0'
+            part2_clean = part2.replace(',', '') if part2 else None
+            
+            # Get the maximum value from this match
+            if part2_clean:
+                # It's a range - use MAXIMUM value
+                try:
+                    match_value = float(part2_clean)
+                except ValueError:
+                    continue
+            else:
+                # It's a single value
+                try:
+                    match_value = float(part1_clean)
+                except ValueError:
+                    continue
+            
+            # Convert to monthly if yearly
+            time_unit = time_unit.upper() if time_unit else ''
+            if time_unit in ['Y', '年']:
+                monthly_value = match_value / 12
+            else:
+                # Assume monthly if not explicitly yearly
+                monthly_value = match_value
+            
+            # Track maximum
+            if monthly_value > max_monthly_value:
+                max_monthly_value = monthly_value
+        
+        # If no structured pattern found, try to find any large number
+        if max_monthly_value == 0:
+            # Look for any numbers in the text
+            all_numbers = re.findall(r'\d[\d,]*', contents)
+            if all_numbers:
+                # Use the largest number found
+                clean_numbers = []
+                for n in all_numbers:
+                    try:
+                        clean_numbers.append(float(n.replace(',', '')))
+                    except ValueError:
+                        continue
+                
+                if clean_numbers:
+                    max_monthly_value = max(clean_numbers)
+                    # Assume it's yearly if very large
+                    if max_monthly_value > 500000:
+                        max_monthly_value = max_monthly_value / 12
+        
+        return int(max_monthly_value) if max_monthly_value > 0 else None
+        
+    except (ValueError, TypeError, AttributeError) as e:
+        logger.warning(f"Error extracting max award value: {str(e)}")
+        return None
+
+
 def home(request):
     return render(request, "scholarships/home.html")
 
@@ -93,85 +175,44 @@ def scholarship_list(request):
         if data["plural_grants"]:
             scholarships = scholarships.filter(plural_grants=data["plural_grants"])
 
-        # Filter by award amount range
-        if data["award_amount_min"] is not None or data["award_amount_max"] is not None:
+        # Filter by minimum award amount
+        if data.get("award_amount_min") is not None:
             from django.db.models import Q
 
             from .templatetags.scholarship_extras import extract_single_amount
 
-            min_amount = data["award_amount_min"] if data["award_amount_min"] is not None else 0
-            max_amount = data["award_amount_max"] if data["award_amount_max"] is not None else 600000
+            min_amount = data["award_amount_min"]
             
-            # Validate amounts are within acceptable range
+            # Validate amount is within acceptable range
             min_amount = max(0, min(min_amount, 600000))
-            max_amount = max(0, min(max_amount, 600000))
-
+            
             matching_ids = []
+            
             for scholarship in scholarships:
                 if not scholarship.contents:
                     continue
-
+                
                 contents = str(scholarship.contents).strip()
+                
                 # Normalize full-width characters
                 contents = contents.replace('Ｍ', 'M').replace('Ｄ', 'D').replace('／', '/')
-
-                # Skip variable amounts - include them in all ranges
-                variable_indicators = ['not fixed', 'tba', 'tbc', 'to be announced', 'to be confirmed', 'variable']
+                
+                # Always include variable amounts
+                variable_indicators = [
+                    'not fixed', 'tba', 'tbc', 
+                    'to be announced', 'to be confirmed', 'variable',
+                    '未定', '未確定'
+                ]
                 if any(indicator in contents.lower() for indicator in variable_indicators):
                     matching_ids.append(scholarship.id)
                     continue
-
-                # Handle "Up to..." format - include if max amount is within range
-                if 'up to' in contents.lower():
-                    match = re.search(r'(\d+(?:-\d+)?)\s*[/／]?[MYmy月]', contents, re.IGNORECASE)
-                    if match:
-                        amount_part = match.group(1)
-                        # Extract max value from range or single value
-                        if '-' in amount_part or '−' in amount_part:
-                            parts = re.split(r'[-−ー]', amount_part)
-                            max_val = extract_single_amount(parts[-1], contents)
-                        else:
-                            max_val = extract_single_amount(amount_part, contents)
-
-                        if max_val and max_val >= min_amount:
-                            matching_ids.append(scholarship.id)
-                    continue
-
-                # Handle tiered amounts - use range
-                tiered_pattern = r'(\d+(?:-\d+)?\s*[/／]?[MYmy月])'
-                tiered_matches = re.findall(tiered_pattern, contents, re.IGNORECASE)
-                if len(tiered_matches) > 1:
-                    amounts = [extract_single_amount(match, contents) for match in tiered_matches]
-                    valid_amounts = [a for a in amounts if a is not None]
-                    if valid_amounts:
-                        tier_min = min(valid_amounts)
-                        tier_max = max(valid_amounts)
-                        # Check if ranges overlap
-                        if not (tier_max < min_amount or tier_min > max_amount):
-                            matching_ids.append(scholarship.id)
-                    continue
-
-                # Handle range format
-                range_pattern = r'(\d+)\s*[-−ー]\s*(\d+)\s*[/／]?([MYmy月])'
-                range_match = re.search(range_pattern, contents, re.IGNORECASE)
-                if range_match:
-                    range_min = extract_single_amount(range_match.group(1), contents)
-                    range_max = extract_single_amount(range_match.group(2), contents)
-                    if range_min and range_max:
-                        # Check if ranges overlap
-                        if not (range_max < min_amount or range_min > max_amount):
-                            matching_ids.append(scholarship.id)
-                    continue
-
-                # Handle single value format
-                single_pattern = r'(\d+(?:-\d+)?)\s*[/／]?([MYmy月])'
-                single_match = re.search(single_pattern, contents, re.IGNORECASE)
-                if single_match:
-                    amount = extract_single_amount(single_match.group(1), contents)
-                    if amount and min_amount <= amount <= max_amount:
-                        matching_ids.append(scholarship.id)
-                    continue
-
+                
+                # Extract the maximum value from the award amount
+                max_award_value = extract_max_award_value(contents)
+                
+                if max_award_value is not None and max_award_value >= min_amount:
+                    matching_ids.append(scholarship.id)
+            
             scholarships = scholarships.filter(id__in=matching_ids)
 
     return render(

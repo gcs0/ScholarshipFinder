@@ -213,103 +213,134 @@ def get_qualifier_choices():
 
 @register.filter
 def transform_award_amount(amount_string):
-    """Transform award amount to monthly integer range with proper formatting"""
+    """
+    Transform award amount to formatted monthly value.
+    For ranges, shows the range properly formatted.
+    For variable amounts, shows "Variable".
+    Fixes "0,000" display issues.
+    """
     if not amount_string:
         return ""
 
     try:
         amount_string = str(amount_string).strip()
-
+        
         # Normalize full-width characters
         amount_string = amount_string.replace('Ｍ', 'M').replace('Ｄ', 'D').replace('／', '/')
-
+        amount_string = amount_string.replace('−', '-').replace('ー', '-')
+        
         # Handle variable/non-fixed amounts
-        variable_indicators = ['not fixed', 'tba', 'tbc', 'to be announced', 'to be confirmed', 'variable']
+        variable_indicators = [
+            'not fixed', 'tba', 'tbc', 
+            'to be announced', 'to be confirmed', 'variable',
+            '未定', '未確定'
+        ]
         if any(indicator in amount_string.lower() for indicator in variable_indicators):
             return "Variable"
-
+        
         # Handle "Up to..." format
-        if 'up to' in amount_string.lower():
-            match = __import__('re').search(r'(\d+(?:-\d+)?)\s*[/／]?[MYmy月]', amount_string, __import__('re').IGNORECASE)
+        if 'up to' in amount_string.lower() or '最大' in amount_string or '最高' in amount_string:
+            match = re.search(r'(\d[\d,]*)\s*[/／]?([YMymy年月])?', amount_string, re.IGNORECASE)
             if match:
-                return extract_and_format_amount(match.group(1), amount_string)
+                value = format_single_value(match.group(1), match.group(2))
+                if value:
+                    return f"Up to {value}"
             return "Variable"
-
-        # Handle tiered amounts (e.g., "U150/M M180/M D200/M")
-        tiered_pattern = r'(\d+(?:-\d+)?\s*[/／]?[MYmy月])'
-        tiered_matches = __import__('re').findall(tiered_pattern, amount_string, __import__('re').IGNORECASE)
-        if len(tiered_matches) > 1:
-            amounts = [extract_single_amount(match, amount_string) for match in tiered_matches]
-            valid_amounts = [a for a in amounts if a is not None]
-            if valid_amounts:
-                return f"{min(valid_amounts):,} - {max(valid_amounts):,},000"
-
-        # Handle range format (e.g., "300-500/Y")
-        range_pattern = r'(\d+)\s*[-−ー]\s*(\d+)\s*[/／]?([MYmy月])'
-        range_match = __import__('re').search(range_pattern, amount_string, __import__('re').IGNORECASE)
+        
+        # Handle range format (e.g., "25-41,000/Y" or "300-500/Y")
+        range_pattern = r'(\d[\d,]*)\s*[-−ー]\s*(\d[\d,]*)\s*(?:/|／)?([YMymy年月])?'
+        range_match = re.search(range_pattern, amount_string, re.IGNORECASE)
         if range_match:
-            return extract_and_format_amount(f"{range_match.group(1)}-{range_match.group(2)}", amount_string)
-
-        # Handle single value format (e.g., "600/Y")
-        single_pattern = r'(\d+(?:-\d+)?)\s*[/／]?([MYmy月])'
-        single_match = __import__('re').search(single_pattern, amount_string, __import__('re').IGNORECASE)
+            min_val = format_single_value(range_match.group(1), range_match.group(3))
+            max_val = format_single_value(range_match.group(2), range_match.group(3))
+            if min_val and max_val:
+                return f"{min_val} - {max_val}"
+        
+        # Handle single value format
+        single_pattern = r'(\d[\d,]+)\s*(?:/|／)?([YMymy年月])?'
+        single_match = re.search(single_pattern, amount_string, re.IGNORECASE)
         if single_match:
-            return extract_and_format_amount(single_match.group(1), amount_string)
-
-        # If no pattern matches, try to extract any numbers
-        numbers = __import__('re').findall(r'\d+', amount_string)
+            value = format_single_value(single_match.group(1), single_match.group(2))
+            if value:
+                return value
+        
+        # If no pattern matches, try to find any numbers
+        numbers = re.findall(r'\d[\d,]+', amount_string)
         if numbers:
-            return f"{numbers[0]:,},000"
-
+            # Use the largest number found
+            clean_numbers = []
+            for n in numbers:
+                try:
+                    clean_numbers.append(float(n.replace(',', '')))
+                except ValueError:
+                    continue
+            
+            if clean_numbers:
+                largest = max(clean_numbers)
+                # Assume it's yearly if very large, otherwise monthly
+                if largest > 500000:
+                    largest = largest / 12
+                return f"¥{int(largest):,}"
+        
+        # Return original string if no parsing possible
         return amount_string
+        
     except Exception:
         return amount_string if amount_string else ""
 
-def extract_and_format_amount(amount_part, original_string):
-    """Extract and format amount from matched pattern"""
-    import re
 
-    # Check if it's a range
-    if '-' in amount_part or '−' in amount_part or 'ー' in amount_part:
-        parts = re.split(r'[-−ー]', amount_part)
-        if len(parts) == 2:
-            try:
-                min_val = extract_single_amount(parts[0], original_string)
-                max_val = extract_single_amount(parts[1], original_string)
-                if min_val is not None and max_val is not None:
-                    return f"{min_val:,} - {max_val:,},000"
-            except (ValueError, TypeError):
-                pass
-
-    # Single value
-    value = extract_single_amount(amount_part, original_string)
-    if value is not None:
-        return f"{value:,},000"
-
-    return amount_part
+def format_single_value(value_str, time_unit):
+    """
+    Format a single numeric value as monthly amount in yen.
+    Returns formatted string like "¥50,000" or None if parsing fails.
+    """
+    try:
+        # Clean and parse the value
+        value = float(value_str.replace(',', ''))
+        
+        # Convert to monthly if yearly
+        time_unit = time_unit.upper() if time_unit else ''
+        if time_unit in ['Y', '年']:
+            monthly_value = value / 12
+        else:
+            monthly_value = value
+        
+        # Format with commas and yen symbol
+        return f"¥{int(monthly_value):,}"
+        
+    except (ValueError, TypeError):
+        return None
 
 def extract_single_amount(amount_str, original_string):
-    """Extract single numeric value and convert to monthly integer"""
-
+    """
+    Extract single numeric value and convert to monthly integer.
+    Simplified version that handles ranges properly.
+    """
     try:
         amount_str = str(amount_str).strip()
-        # Clean up full-width characters
+        
+        # Clean up full-width characters and hyphens
         amount_str = amount_str.replace('Ｍ', 'M').replace('Ｄ', 'D').replace('／', '/')
-
+        amount_str = amount_str.replace('−', '-').replace('ー', '-')
+        
+        # Clean commas from the amount
+        amount_str = amount_str.replace(',', '')
+        
+        # Parse the numeric value
         amount = float(amount_str)
-
+        
         # Determine if yearly or monthly
         yearly_indicators = ['Y', 'y', '年']
         monthly_indicators = ['M', 'm', '月']
-
-        is_yearly = any(indicator in original_string for indicator in yearly_indicators)
-        is_monthly = any(indicator in original_string for indicator in monthly_indicators)
-
+        
+        is_yearly = any(indicator in str(original_string) for indicator in yearly_indicators)
+        is_monthly = any(indicator in str(original_string) for indicator in monthly_indicators)
+        
         if is_yearly and not is_monthly:
             monthly_amount = amount / 12
         else:
             monthly_amount = amount
-
+        
         return int(monthly_amount)
     except (ValueError, TypeError):
         return None

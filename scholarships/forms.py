@@ -80,8 +80,17 @@ class ScholarshipFilterForm(forms.Form):
     designated_schools = forms.CharField(required=False, label="Designated Schools")
     designated_fields = forms.CharField(required=False, label="Fields of Study")
     plural_grants = forms.ChoiceField(choices=[], required=False, label="Multiple Grants")
-    award_amount_min = forms.IntegerField(required=False, min_value=0, max_value=600000, label="Min Award (¥/month)")
-    award_amount_max = forms.IntegerField(required=False, min_value=0, max_value=600000, label="Max Award (¥/month)")
+    award_amount_min = forms.IntegerField(
+        required=False, 
+        min_value=0, 
+        max_value=600000,
+        label="Minimum Award (¥/month)",
+        help_text="Enter minimum monthly award amount. Variable amounts will always be included.",
+        widget=forms.NumberInput(attrs={
+            'placeholder': 'e.g., 50000',
+            'step': '1000'
+        })
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
