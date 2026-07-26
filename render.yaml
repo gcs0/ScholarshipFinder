@@ -12,9 +12,9 @@ services:
       - key: DEBUG
         value: "False"
       - key: ALLOWED_HOSTS
-        value: ".onrender.com,localhost,127.0.0.1"
+        value: ".onrender.com,localhost,127.0.0.1,scholarships.jtob.org"
       - key: CSRF_TRUSTED_ORIGINS
-        value: "https://*.onrender.com"
+        value: "https://*.onrender.com,https://scholarships.jtob.org"
       - key: SECURE_SSL_REDIRECT
         value: "True"
       - key: ADMIN_PASSWORD
