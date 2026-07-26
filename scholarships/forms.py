@@ -1,11 +1,7 @@
 from django import forms
-from django.contrib.auth import authenticate, get_user_model
-from django.contrib.auth import forms as auth_forms
+from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import (
     AuthenticationForm,
-    PasswordChangeForm,
-    PasswordResetForm,
-    SetPasswordForm,
     UserCreationForm,
 )
 
@@ -76,16 +72,17 @@ class ScholarshipFilterForm(forms.Form):
     designated_schools = forms.CharField(required=False, label="Designated Schools")
     designated_fields = forms.CharField(required=False, label="Fields of Study")
     plural_grants = forms.ChoiceField(choices=[], required=False, label="Multiple Grants")
-    contents = forms.CharField(required=False, label="Award Amount")
+    award_amount_min = forms.IntegerField(required=False, min_value=0, max_value=1000000, label="Min Award (¥/month)")
+    award_amount_max = forms.IntegerField(required=False, min_value=0, max_value=1000000, label="Max Award (¥/month)")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
         section_choices = [("", "All")] + list(Scholarship.SECTION_CHOICES)
         self.fields["section"].choices = section_choices
-        
+
         self.fields["qualifier"].choices = self._get_qualifier_choices()
-        
+
         plural_grants_values = (
             Scholarship.objects.values_list("plural_grants", flat=True)
             .distinct()
@@ -101,15 +98,15 @@ class ScholarshipFilterForm(forms.Form):
             if qualifier_str:
                 codes = [code.strip() for code in qualifier_str.split('\n') if code.strip()]
                 all_qualifiers.update(codes)
-        
+
         try:
             from .templatetags.scholarship_extras import QUALIFIER_MAPPING
         except ImportError:
             QUALIFIER_MAPPING = {}
-            
+
         qualifier_choices = []
         for code in sorted(all_qualifiers):
             display_name = QUALIFIER_MAPPING.get(code, code)
             qualifier_choices.append((code, f"{code} - {display_name}"))
-        
+
         return qualifier_choices

@@ -1,7 +1,6 @@
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.views import PasswordChangeDoneView, PasswordChangeView
 from django.core.management import call_command
 from django.shortcuts import redirect, render
@@ -13,7 +12,7 @@ from .forms import (
     ScholarshipFilterForm,
     ScholarshipRequestForm,
 )
-from .models import Scholarship, ScholarshipRequest, User
+from .models import Scholarship, ScholarshipRequest
 
 
 def home(request):
@@ -26,49 +25,120 @@ def scholarship_list(request):
 
     if filter_form.is_valid():
         data = filter_form.cleaned_data
-        
+
         # Filter by section
         if data["section"]:
             scholarships = scholarships.filter(section=data["section"])
-        
+
         # Filter by scholarship name (partial match)
         if data["scholarship_name"]:
             scholarships = scholarships.filter(
                 scholarship_name__icontains=data["scholarship_name"]
             )
-        
+
         # Filter by qualifier (multiple choices)
         if data["qualifier"]:
-            qualifier_filters = []
-            for code in data["qualifier"]:
-                qualifier_filters.append(qualifier__icontains=code)
-            
             from django.db.models import Q
             qualifier_q = Q()
-            for filter_q in qualifier_filters:
-                qualifier_q |= Q(**{filter_q: True})
-            
+            for code in data["qualifier"]:
+                qualifier_q |= Q(qualifier__icontains=code)
+
             scholarships = scholarships.filter(qualifier_q)
-        
+
         # Filter by designated schools (partial match)
         if data["designated_schools"]:
             scholarships = scholarships.filter(
                 designated_schools__icontains=data["designated_schools"]
             )
-        
+
         # Filter by designated fields (partial match)
         if data["designated_fields"]:
             scholarships = scholarships.filter(
                 designated_fields__icontains=data["designated_fields"]
             )
-        
+
         # Filter by plural grants
         if data["plural_grants"]:
             scholarships = scholarships.filter(plural_grants=data["plural_grants"])
-        
-        # Filter by contents (award amount)
-        if data["contents"]:
-            scholarships = scholarships.filter(contents__icontains=data["contents"])
+
+        # Filter by award amount range
+        if data["award_amount_min"] or data["award_amount_max"]:
+            import re
+
+            from django.db.models import Q
+
+            from .templatetags.scholarship_extras import extract_single_amount
+
+            min_amount = data["award_amount_min"] or 0
+            max_amount = data["award_amount_max"] or 1000000
+
+            matching_ids = []
+            for scholarship in scholarships:
+                if not scholarship.contents:
+                    continue
+
+                contents = str(scholarship.contents).strip()
+                # Normalize full-width characters
+                contents = contents.replace('Ｍ', 'M').replace('Ｄ', 'D').replace('／', '/')
+
+                # Skip variable amounts - include them in all ranges
+                variable_indicators = ['not fixed', 'tba', 'tbc', 'to be announced', 'to be confirmed', 'variable']
+                if any(indicator in contents.lower() for indicator in variable_indicators):
+                    matching_ids.append(scholarship.id)
+                    continue
+
+                # Handle "Up to..." format - include if max amount is within range
+                if 'up to' in contents.lower():
+                    match = re.search(r'(\d+(?:-\d+)?)\s*[/／]?[MYmy月]', contents, re.IGNORECASE)
+                    if match:
+                        amount_part = match.group(1)
+                        # Extract max value from range or single value
+                        if '-' in amount_part or '−' in amount_part:
+                            parts = re.split(r'[-−ー]', amount_part)
+                            max_val = extract_single_amount(parts[-1], contents)
+                        else:
+                            max_val = extract_single_amount(amount_part, contents)
+
+                        if max_val and max_val >= min_amount:
+                            matching_ids.append(scholarship.id)
+                    continue
+
+                # Handle tiered amounts - use range
+                tiered_pattern = r'(\d+(?:-\d+)?\s*[/／]?[MYmy月])'
+                tiered_matches = re.findall(tiered_pattern, contents, re.IGNORECASE)
+                if len(tiered_matches) > 1:
+                    amounts = [extract_single_amount(match, contents) for match in tiered_matches]
+                    valid_amounts = [a for a in amounts if a is not None]
+                    if valid_amounts:
+                        tier_min = min(valid_amounts)
+                        tier_max = max(valid_amounts)
+                        # Check if ranges overlap
+                        if not (tier_max < min_amount or tier_min > max_amount):
+                            matching_ids.append(scholarship.id)
+                    continue
+
+                # Handle range format
+                range_pattern = r'(\d+)\s*[-−ー]\s*(\d+)\s*[/／]?([MYmy月])'
+                range_match = re.search(range_pattern, contents, re.IGNORECASE)
+                if range_match:
+                    range_min = extract_single_amount(range_match.group(1), contents)
+                    range_max = extract_single_amount(range_match.group(2), contents)
+                    if range_min and range_max:
+                        # Check if ranges overlap
+                        if not (range_max < min_amount or range_min > max_amount):
+                            matching_ids.append(scholarship.id)
+                    continue
+
+                # Handle single value format
+                single_pattern = r'(\d+(?:-\d+)?)\s*[/／]?([MYmy月])'
+                single_match = re.search(single_pattern, contents, re.IGNORECASE)
+                if single_match:
+                    amount = extract_single_amount(single_match.group(1), contents)
+                    if amount and min_amount <= amount <= max_amount:
+                        matching_ids.append(scholarship.id)
+                    continue
+
+            scholarships = scholarships.filter(id__in=matching_ids)
 
     return render(
         request,
@@ -89,18 +159,18 @@ def scholarship_detail(request, pk):
 @login_required
 def request_form(request, scholarship_id):
     scholarship = Scholarship.objects.get(pk=scholarship_id)
-    
+
     # Check if user already has a pending request for this scholarship
     existing_request = ScholarshipRequest.objects.filter(
         user=request.user,
         scholarship=scholarship,
         status='pending'
     ).first()
-    
+
     if existing_request:
         messages.warning(request, "You already have a pending request for this scholarship.")
         return redirect("scholarship-detail", pk=scholarship_id)
-    
+
     if request.method == "POST":
         form = ScholarshipRequestForm(request.POST)
         if form.is_valid():
@@ -181,7 +251,7 @@ def admin_dashboard(request):
     pending_requests = ScholarshipRequest.objects.filter(status='pending').count()
     total_requests = ScholarshipRequest.objects.count()
     recent_requests = ScholarshipRequest.objects.order_by('-created_at')[:10]
-    
+
     return render(request, "scholarships/admin_dashboard.html", {
         'pending_requests': pending_requests,
         'total_requests': total_requests,
@@ -193,12 +263,12 @@ def admin_dashboard(request):
 def admin_requests(request):
     status_filter = request.GET.get('status', 'all')
     requests = ScholarshipRequest.objects.all()
-    
+
     if status_filter != 'all':
         requests = requests.filter(status=status_filter)
-    
+
     requests = requests.order_by('-created_at')
-    
+
     return render(request, "scholarships/admin_requests.html", {
         'requests': requests,
         'status_filter': status_filter
@@ -208,22 +278,22 @@ def admin_requests(request):
 @user_passes_test(lambda u: u.is_superuser)
 def admin_request_detail(request, pk):
     request_obj = ScholarshipRequest.objects.get(pk=pk)
-    
+
     if request.method == "POST":
         action = request.POST.get('action')
         admin_notes = request.POST.get('admin_notes', '')
-        
+
         if action in ['approve', 'reject']:
             request_obj.status = 'approved' if action == 'approve' else 'rejected'
             request_obj.admin_notes = admin_notes
             request_obj.reviewed_by = request.user
             request_obj.reviewed_date = timezone.now()
             request_obj.save()
-            
+
             action_text = "approved" if action == 'approve' else "rejected"
             messages.success(request, f"Request {action_text} successfully.")
             return redirect("admin-requests")
-    
+
     return render(request, "scholarships/admin_request_detail.html", {
         'request_obj': request_obj
     })
@@ -238,9 +308,9 @@ def reload_scholarships(request):
             messages.success(request, "Scholarships reloaded successfully from CSV!")
         except Exception as e:
             messages.error(request, f"Error reloading scholarships: {str(e)}")
-        
+
         return redirect("admin-dashboard")
-    
+
     return render(request, "scholarships/reload_scholarships.html")
 
 

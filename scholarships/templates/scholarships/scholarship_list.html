@@ -33,9 +33,16 @@
                     <label for="id_plural_grants">Grants</label>
                     {{ filter_form.plural_grants }}
                 </div>
-                <div class="filter-field">
-                    <label for="id_contents">Award</label>
-                    {{ filter_form.contents }}
+                <div class="filter-field award-range-filter">
+                    <label>Award Amount (¥/month)</label>
+                    <div class="range-slider-container">
+                        <input type="range" id="award-min" name="award_amount_min" min="0" max="600000" step="5000" value="0" class="range-slider">
+                        <input type="range" id="award-max" name="award_amount_max" min="0" max="600000" step="5000" value="600000" class="range-slider">
+                        <div class="range-values">
+                            <span id="award-min-display">¥0</span>
+                            <span id="award-max-display">¥600,000</span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <details class="qualifier-details">
@@ -74,11 +81,11 @@
                             <td>{{ s.foundation_name }}</td>
                             <td><a href="{% url 'scholarship-detail' s.pk %}">{{ s.scholarship_name }}</a></td>
                             <td>{{ s.qualifier|expand_qualifier }}</td>
-                            <td>{{ s.designated_schools }}</td>
-                            <td>{{ s.designated_fields }}</td>
+                            <td><div class="text-clamp" id="schools-{{ s.pk }}">{{ s.designated_schools }}</div><button class="clamp-toggle" onclick="toggleClamp('schools-{{ s.pk }}')" data-target="schools-{{ s.pk }}">Show more</button></td>
+                            <td><div class="text-clamp" id="fields-{{ s.pk }}">{{ s.designated_fields }}</div><button class="clamp-toggle" onclick="toggleClamp('fields-{{ s.pk }}')" data-target="fields-{{ s.pk }}">Show more</button></td>
                             <td>{{ s.plural_grants|display_grants }}</td>
-                            <td>{{ s.contents }}</td>
-                            <td>{{ s.application_period }}</td>
+                            <td>{{ s.contents|transform_award_amount }}</td>
+                            <td><div class="text-clamp" id="period-{{ s.pk }}">{{ s.application_period }}</div><button class="clamp-toggle" onclick="toggleClamp('period-{{ s.pk }}')" data-target="period-{{ s.pk }}">Show more</button></td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -99,5 +106,71 @@ function toggleFilters() {
     btn.setAttribute('aria-expanded', !hidden);
     btn.textContent = hidden ? 'Filters' : 'Hide Filters';
 }
+
+function toggleClamp(elementId) {
+    const element = document.getElementById(elementId);
+    const button = element.nextElementSibling;
+    
+    if (element.classList.contains('expanded')) {
+        element.classList.remove('expanded');
+        button.textContent = 'Show more';
+    } else {
+        element.classList.add('expanded');
+        button.textContent = 'Show less';
+    }
+}
+
+// Initialize range slider and show/hide more buttons
+document.addEventListener('DOMContentLoaded', function() {
+    // Award amount range slider
+    const minSlider = document.getElementById('award-min');
+    const maxSlider = document.getElementById('award-max');
+    const minDisplay = document.getElementById('award-min-display');
+    const maxDisplay = document.getElementById('award-max-display');
+
+    if (minSlider && maxSlider) {
+        function updateSliderDisplay() {
+            let minValue = parseInt(minSlider.value);
+            let maxValue = parseInt(maxSlider.value);
+
+            // Ensure min doesn't exceed max
+            if (minValue > maxValue) {
+                const temp = minValue;
+                minValue = maxValue;
+                maxValue = temp;
+            }
+
+            minDisplay.textContent = '¥' + minValue.toLocaleString();
+            maxDisplay.textContent = '¥' + maxValue.toLocaleString();
+        }
+
+        minSlider.addEventListener('input', updateSliderDisplay);
+        maxSlider.addEventListener('input', updateSliderDisplay);
+        
+        // Initial display update
+        updateSliderDisplay();
+    }
+
+    // Handle show/hide more buttons based on content
+    const clampButtons = document.querySelectorAll('.clamp-toggle');
+    clampButtons.forEach(function(button) {
+        const targetId = button.getAttribute('data-target');
+        const targetElement = document.getElementById(targetId);
+        
+        if (targetElement) {
+            const textContent = targetElement.textContent.trim();
+            
+            // Hide button if content is empty or very short
+            if (!textContent || textContent.length < 50) {
+                button.style.display = 'none';
+            } else {
+                // Check if content actually overflows
+                if (targetElement.scrollHeight <= targetElement.clientHeight) {
+                    button.style.display = 'none';
+                }
+            }
+        }
+    });
+});
 </script>
 {% endblock %}
