@@ -3,7 +3,7 @@
 with open('Scholarships.csv', 'r', encoding='utf-8') as f:
     reader = csv.reader(f)
     rows = list(reader)
-    
+
     # Find the header row
     header_row = None
     header_index = None
@@ -12,10 +12,10 @@ with open('Scholarships.csv', 'r', encoding='utf-8') as f:
             header_row = row
             header_index = i
             break
-    
+
     print('Header row found at index:', header_index)
     print('Header columns:', header_row)
-    
+
     # Find the contents column index
     contents_index = None
     if header_row:
@@ -24,7 +24,7 @@ with open('Scholarships.csv', 'r', encoding='utf-8') as f:
                 contents_index = i
                 print(f'Contents column found at index: {i}')
                 break
-    
+
     # Show some sample data
     if contents_index is not None and header_index is not None:
         print('\nSample contents from data rows:')

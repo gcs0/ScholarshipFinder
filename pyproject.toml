@@ -14,13 +14,16 @@ target-version = ["py312"]
 [tool.ruff]
 line-length = 88
 target-version = "py312"
+exclude = ["*/migrations/*.py", "examine_*.py", "verify_changes.py", "setup_admin.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W"]
 
 [tool.pytest.ini_options]
 testpaths = ["scholarships"]
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
 pythonpath = ["."]
+DJANGO_SETTINGS_MODULE = "config.settings"
 
 [dependency-groups]
-dev = ["black", "ruff", "pytest", "pytest-cov"]
+dev = ["black", "ruff", "pytest", "pytest-cov", "pytest-django"]

@@ -1,0 +1,60 @@
+{% load scholarship_extras %}
+
+<div id="results">
+    {% if page_obj.object_list %}
+        <div class="table-wrapper">
+            <table class="scholarship-table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Foundation</th>
+                        <th>Scholarship Name</th>
+                        <th>Qualifier</th>
+                        <th>Schools</th>
+                        <th>Fields</th>
+                        <th>Grants</th>
+                        <th>Award</th>
+                        <th>App Period</th>
+                        <th>Save</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in page_obj %}
+                        {% include "scholarships/_scholarship_card.html" %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="result-count">{{ paginator.count }} scholarship{{ paginator.count|pluralize }} found{% if page_obj.has_other_pages %} — page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% endif %}</p>
+
+        {% if page_obj.has_other_pages %}
+            <nav class="pagination" aria-label="Scholarship pagination">
+                {% if page_obj.has_previous %}
+                    <a class="pagination-link"
+                       href="?page={{ page_obj.previous_page_number }}{% if filter_querystring %}&{{ filter_querystring }}{% endif %}"
+                       hx-get="{% url 'scholarship-list' %}?page={{ page_obj.previous_page_number }}{% if filter_querystring %}&{{ filter_querystring }}{% endif %}"
+                       hx-target="#results"
+                       hx-select="#results"
+                       hx-swap="outerHTML">
+                        &larr; Previous
+                    </a>
+                {% endif %}
+
+                <span class="pagination-current">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+
+                {% if page_obj.has_next %}
+                    <a class="pagination-link"
+                       href="?page={{ page_obj.next_page_number }}{% if filter_querystring %}&{{ filter_querystring }}{% endif %}"
+                       hx-get="{% url 'scholarship-list' %}?page={{ page_obj.next_page_number }}{% if filter_querystring %}&{{ filter_querystring }}{% endif %}"
+                       hx-target="#results"
+                       hx-select="#results"
+                       hx-swap="outerHTML">
+                        Next &rarr;
+                    </a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    {% else %}
+        <p class="result-count">No scholarships found matching your criteria.</p>
+    {% endif %}
+</div>

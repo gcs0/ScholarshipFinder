@@ -53,6 +53,7 @@
 {% endif %}
 
 <div class="profile-actions">
+    <a href="{% url 'favorites' %}" class="button">My Favorites</a>
     <a href="{% url 'password-change' %}" class="button">Change Password</a>
     {% if user.is_superuser %}
     <a href="{% url 'admin-dashboard' %}" class="button">Admin Dashboard</a>

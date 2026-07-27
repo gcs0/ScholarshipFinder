@@ -1,0 +1,24 @@
+{% load static %}
+{% if user.is_authenticated %}
+    <span id="fav-{{ scholarship.pk }}" class="favorite-toggle">
+        <form method="post" action="{% url 'toggle-favorite' scholarship.pk %}"
+              hx-post="{% url 'toggle-favorite' scholarship.pk %}"
+              hx-target="#fav-{{ scholarship.pk }}"
+              hx-swap="outerHTML">
+            {% csrf_token %}
+            {% if scholarship.is_favorited %}
+                <button type="submit" class="fav-btn is-favorited" aria-pressed="true" title="Remove from favorites">
+                    ★ Saved
+                </button>
+            {% else %}
+                <button type="submit" class="fav-btn" aria-pressed="false" title="Save to favorites">
+                    ☆ Save
+                </button>
+            {% endif %}
+        </form>
+    </span>
+{% else %}
+    <a class="fav-btn fav-login" href="{% url 'login' %}?next={{ request.path }}" title="Login to save scholarships">
+        ☆ Save
+    </a>
+{% endif %}

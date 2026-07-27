@@ -1,0 +1,46 @@
+{% extends "scholarships/base.html" %}
+{% load scholarship_extras %}
+
+{% block title %}My Favorites — ScholarshipFinder{% endblock %}
+
+{% block content %}
+    <h1>My Favorite Scholarships</h1>
+
+    {% if favorites %}
+        <p class="result-count">{{ favorites|length }} saved scholarship{{ favorites|length|pluralize }}</p>
+        <div class="table-wrapper">
+            <table class="scholarship-table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Foundation</th>
+                        <th>Scholarship Name</th>
+                        <th>Award</th>
+                        <th>Saved On</th>
+                        <th>Remove</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fav in favorites %}
+                        {% with s=fav.scholarship %}
+                            <tr>
+                                <td data-label="Type"><span class="section-badge">{{ s.section|get_section_display }}</span></td>
+                                <td data-label="Foundation">{{ s.foundation_name }}</td>
+                                <td data-label="Scholarship Name"><a href="{% url 'scholarship-detail' s.pk %}">{{ s.scholarship_name }}</a></td>
+                                <td data-label="Award">{{ s.contents|transform_award_amount }}</td>
+                                <td data-label="Saved On">{{ fav.created_at|date:"F d, Y" }}</td>
+                                <td data-label="Remove">{% include "scholarships/_favorite_button.html" with scholarship=s %}</td>
+                            </tr>
+                        {% endwith %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="result-count">You haven't saved any scholarships yet.</p>
+    {% endif %}
+
+    <div class="profile-actions">
+        <a href="{% url 'scholarship-list' %}" class="button">Browse Scholarships</a>
+    </div>
+{% endblock %}

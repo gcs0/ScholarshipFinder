@@ -7,6 +7,7 @@
     <div class="scholarship-detail-header">
         <h1>{{ scholarship.scholarship_name }}</h1>
         <span class="section-badge">{{ scholarship.section|get_section_display }}</span>
+        <span class="detail-favorite">{% include "scholarships/_favorite_button.html" %}</span>
     </div>
 
     <div class="scholarship-detail-content">

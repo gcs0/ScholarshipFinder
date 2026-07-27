@@ -3,7 +3,7 @@
 with open('Scholarships.csv', 'r', encoding='utf-8') as f:
     reader = csv.reader(f)
     rows = list(reader)
-    
+
     print('Total rows:', len(rows))
     print('Columns per row:', [len(row) for row in rows[:5]])
     print('\nFirst 3 rows:')

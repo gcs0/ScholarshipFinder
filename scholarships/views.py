@@ -1,15 +1,16 @@
-import re
 import logging
+import re
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import PasswordChangeDoneView, PasswordChangeView
 from django.core.management import call_command
+from django.core.paginator import Paginator
 from django.db import transaction
+from django.db.models import Exists, OuterRef, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-
-logger = logging.getLogger(__name__)
 
 from .forms import (
     CustomLoginForm,
@@ -17,7 +18,11 @@ from .forms import (
     ScholarshipFilterForm,
     ScholarshipRequestForm,
 )
-from .models import Scholarship, ScholarshipRequest
+from .models import Favorite, Scholarship, ScholarshipRequest
+
+logger = logging.getLogger(__name__)
+
+SCHOLARSHIP_PAGE_SIZE = 12
 
 
 def extract_max_award_value(contents):
@@ -109,145 +114,141 @@ def extract_max_award_value(contents):
         return None
 
 
+def filter_scholarships(queryset, data):
+    """Apply ``ScholarshipFilterForm`` cleaned data to a Scholarship queryset.
+
+    Shared by the full-page and HTMX code paths so filtering behavior stays
+    consistent.
+    """
+    if data["section"]:
+        queryset = queryset.filter(section=data["section"])
+
+    if data["scholarship_name"]:
+        queryset = queryset.filter(scholarship_name__icontains=data["scholarship_name"])
+
+    if data["qualifier"]:
+        qualifier_q = Q()
+        for code in data["qualifier"]:
+            try:
+                if not code or not isinstance(code, str):
+                    continue
+                clean_code = re.sub(r"[^\w\(\)\-]", "", code).strip()
+                if not clean_code:
+                    continue
+                if not re.match(r"^[A-Za-z]+(?:\d+)?(?:\([^)]*\))?$", clean_code):
+                    logger.warning(f"Invalid qualifier code format: '{code}'")
+                    continue
+                qualifier_q |= Q(qualifier__icontains=clean_code)
+            except (re.error, ValueError, TypeError) as e:
+                logger.warning(f"Invalid qualifier code '{code}': {str(e)}")
+                continue
+            except Exception as e:
+                logger.error(
+                    f"Unexpected error processing qualifier code '{code}': {str(e)}"
+                )
+                continue
+        if qualifier_q:
+            queryset = queryset.filter(qualifier_q)
+
+    if data["designated_schools"]:
+        queryset = queryset.filter(
+            designated_schools__icontains=data["designated_schools"]
+        )
+
+    if data["designated_fields"]:
+        queryset = queryset.filter(
+            designated_fields__icontains=data["designated_fields"]
+        )
+
+    if data["plural_grants"]:
+        queryset = queryset.filter(plural_grants=data["plural_grants"])
+
+    # Minimum award amount: filtered in Python (parsed from free-text contents)
+    # before pagination so page size stays bounded.
+    if data.get("award_amount_min") is not None:
+        min_amount = max(0, min(data["award_amount_min"], 600000))
+        variable_indicators = [
+            "not fixed",
+            "tba",
+            "tbc",
+            "to be announced",
+            "to be confirmed",
+            "variable",
+            "未定",
+            "未確定",
+        ]
+        matching_ids = []
+        for scholarship in queryset:
+            if not scholarship.contents:
+                continue
+            contents = (
+                str(scholarship.contents)
+                .strip()
+                .replace("Ｍ", "M")
+                .replace("Ｄ", "D")
+                .replace("／", "/")
+            )
+            if any(indicator in contents.lower() for indicator in variable_indicators):
+                matching_ids.append(scholarship.id)
+                continue
+            max_award_value = extract_max_award_value(contents)
+            if max_award_value is not None and max_award_value >= min_amount:
+                matching_ids.append(scholarship.id)
+        queryset = queryset.filter(id__in=matching_ids)
+
+    return queryset
+
+
+def annotate_favorited(queryset, user):
+    """Annotate each scholarship with an ``is_favorited`` boolean for ``user``.
+
+    Anonymous users get the queryset back unchanged. Uses an ``Exists``
+    subquery so the list renders without an N+1 hit.
+    """
+    if not user.is_authenticated:
+        return queryset
+    fav_exists = Favorite.objects.filter(user=user, scholarship=OuterRef("pk"))
+    return queryset.annotate(is_favorited=Exists(fav_exists))
+
+
 def home(request):
     return render(request, "scholarships/home.html")
 
 
 def scholarship_list(request):
-    scholarships = Scholarship.objects.all()
+    scholarships = annotate_favorited(Scholarship.objects.all(), request.user)
     filter_form = ScholarshipFilterForm(request.GET or None)
 
     if filter_form.is_valid():
-        data = filter_form.cleaned_data
+        scholarships = filter_scholarships(scholarships, filter_form.cleaned_data)
 
-        # Filter by section
-        if data["section"]:
-            scholarships = scholarships.filter(section=data["section"])
+    paginator = Paginator(scholarships, SCHOLARSHIP_PAGE_SIZE)
+    page_obj = paginator.get_page(request.GET.get("page"))
 
-        # Filter by scholarship name (partial match)
-        if data["scholarship_name"]:
-            scholarships = scholarships.filter(
-                scholarship_name__icontains=data["scholarship_name"]
-            )
+    # Preserve active filters across pagination links (drop the page param).
+    filter_qs = request.GET.copy()
+    filter_qs.pop("page", None)
 
-        # Filter by qualifier (multiple choices)
-        if data["qualifier"]:
-            from django.db.models import Q
+    context = {
+        "scholarships": page_obj,
+        "filter_form": filter_form,
+        "page_obj": page_obj,
+        "paginator": paginator,
+        "filter_querystring": filter_qs.urlencode(),
+    }
 
-            qualifier_q = Q()
+    if request.headers.get("HX-Request"):
+        return render(request, "scholarships/_scholarship_results.html", context)
 
-            for code in data["qualifier"]:
-                try:
-                    # Validate and sanitize the code before processing
-                    if not code or not isinstance(code, str):
-                        continue
-
-                    # Clean the code - remove any non-alphanumeric characters except parentheses and hyphens
-                    clean_code = re.sub(r"[^\w\(\)\-]", "", code).strip()
-                    if not clean_code:
-                        continue
-
-                    # Validate code format - only allow alphanumeric with optional parentheses
-                    if not re.match(r"^[A-Za-z]+(?:\d+)?(?:\([^)]*\))?$", clean_code):
-                        logger.warning(f"Invalid qualifier code format: '{code}'")
-                        continue
-
-                    # Use simple contains matching instead of complex regex
-                    # This avoids database regex engine issues
-                    qualifier_q |= Q(qualifier__icontains=clean_code)
-
-                except (re.error, ValueError, TypeError) as e:
-                    # Log the error for debugging but continue processing other codes
-                    logger.warning(f"Invalid qualifier code '{code}': {str(e)}")
-                    continue
-                except Exception as e:
-                    # Catch any other unexpected errors
-                    logger.error(
-                        f"Unexpected error processing qualifier code '{code}': {str(e)}"
-                    )
-                    continue
-
-            if qualifier_q:
-                scholarships = scholarships.filter(qualifier_q)
-
-        # Filter by designated schools (partial match)
-        if data["designated_schools"]:
-            scholarships = scholarships.filter(
-                designated_schools__icontains=data["designated_schools"]
-            )
-
-        # Filter by designated fields (partial match)
-        if data["designated_fields"]:
-            scholarships = scholarships.filter(
-                designated_fields__icontains=data["designated_fields"]
-            )
-
-        # Filter by plural grants
-        if data["plural_grants"]:
-            scholarships = scholarships.filter(plural_grants=data["plural_grants"])
-
-        # Filter by minimum award amount
-        if data.get("award_amount_min") is not None:
-            from django.db.models import Q
-
-            from .templatetags.scholarship_extras import extract_single_amount
-
-            min_amount = data["award_amount_min"]
-
-            # Validate amount is within acceptable range
-            min_amount = max(0, min(min_amount, 600000))
-
-            matching_ids = []
-
-            for scholarship in scholarships:
-                if not scholarship.contents:
-                    continue
-
-                contents = str(scholarship.contents).strip()
-
-                # Normalize full-width characters
-                contents = (
-                    contents.replace("Ｍ", "M").replace("Ｄ", "D").replace("／", "/")
-                )
-
-                # Always include variable amounts
-                variable_indicators = [
-                    "not fixed",
-                    "tba",
-                    "tbc",
-                    "to be announced",
-                    "to be confirmed",
-                    "variable",
-                    "未定",
-                    "未確定",
-                ]
-                if any(
-                    indicator in contents.lower() for indicator in variable_indicators
-                ):
-                    matching_ids.append(scholarship.id)
-                    continue
-
-                # Extract the maximum value from the award amount
-                max_award_value = extract_max_award_value(contents)
-
-                if max_award_value is not None and max_award_value >= min_amount:
-                    matching_ids.append(scholarship.id)
-
-            scholarships = scholarships.filter(id__in=matching_ids)
-
-    return render(
-        request,
-        "scholarships/scholarship_list.html",
-        {"scholarships": scholarships, "filter_form": filter_form},
-    )
+    return render(request, "scholarships/scholarship_list.html", context)
 
 
 def scholarship_detail(request, pk):
-    scholarship = Scholarship.objects.get(pk=pk)
+    scholarship = get_object_or_404(
+        annotate_favorited(Scholarship.objects.all(), request.user), pk=pk
+    )
     return render(
-        request,
-        "scholarships/scholarship_detail.html",
-        {"scholarship": scholarship},
+        request, "scholarships/scholarship_detail.html", {"scholarship": scholarship}
     )
 
 
@@ -327,10 +328,52 @@ def profile(request):
         "-created_at"
     )
     return render(
-        request,
-        "scholarships/profile.html",
-        {"user_requests": user_requests},
+        request, "scholarships/profile.html", {"user_requests": user_requests}
     )
+
+
+@login_required
+def toggle_favorite(request, pk):
+    """Idempotently toggle the current user's favorite on a scholarship.
+
+    HTMX requests receive the ``_favorite_button.html`` partial rendered with
+    the new state; non-HTMX requests are redirected to the scholarship detail.
+    """
+    scholarship = get_object_or_404(Scholarship, pk=pk)
+
+    if request.method == "POST":
+        favorite = Favorite.objects.filter(
+            user=request.user, scholarship=scholarship
+        ).first()
+        if favorite:
+            favorite.delete()
+        else:
+            Favorite.objects.get_or_create(user=request.user, scholarship=scholarship)
+
+    scholarship_qs = annotate_favorited(
+        Scholarship.objects.filter(pk=scholarship.pk), request.user
+    )
+    scholarship = scholarship_qs.get()
+
+    if request.headers.get("HX-Request"):
+        return render(
+            request, "scholarships/_favorite_button.html", {"scholarship": scholarship}
+        )
+
+    return redirect("scholarship-detail", pk=scholarship.pk)
+
+
+@login_required
+def favorite_list(request):
+    favorites = (
+        Favorite.objects.filter(user=request.user)
+        .select_related("scholarship")
+        .order_by("-created_at")
+    )
+    # Every scholarship shown here is favorited by this user by definition.
+    for fav in favorites:
+        fav.scholarship.is_favorited = True
+    return render(request, "scholarships/favorites.html", {"favorites": favorites})
 
 
 # Admin views

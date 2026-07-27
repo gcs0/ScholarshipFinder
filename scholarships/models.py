@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models import UniqueConstraint
 
 
 class User(AbstractUser):
@@ -32,11 +33,7 @@ class Scholarship(models.Model):
     qualifier = models.CharField(max_length=200, blank=True, default="")
     designated_schools = models.TextField(blank=True, default="")
     designated_fields = models.TextField(blank=True, default="")
-    PLURAL_GRANTS_CHOICES = [
-        ("Yes", "Yes"),
-        ("No", "No"),
-        ("Unknown", "Unknown"),
-    ]
+    PLURAL_GRANTS_CHOICES = [("Yes", "Yes"), ("No", "No"), ("Unknown", "Unknown")]
     plural_grants = models.CharField(
         max_length=7, choices=PLURAL_GRANTS_CHOICES, blank=True, default=""
     )
@@ -97,3 +94,22 @@ class ScholarshipRequest(models.Model):
             f"Request to add '{self.scholarship_name}' by {self.user.name} "
             f"({self.status})"
         )
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="favorites")
+    scholarship = models.ForeignKey(
+        Scholarship, on_delete=models.CASCADE, related_name="favorited_by"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["user", "scholarship"], name="uniq_user_scholarship_fav"
+            )
+        ]
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user.name} ★ {self.scholarship.scholarship_name}"

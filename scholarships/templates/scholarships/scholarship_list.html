@@ -11,7 +11,13 @@
     </button>
 
     <section id="filter-panel" aria-label="Filter scholarships" hidden>
-        <form method="get">
+        <form method="get"
+              action="{% url 'scholarship-list' %}"
+              hx-get="{% url 'scholarship-list' %}"
+              hx-target="#results"
+              hx-select="#results"
+              hx-swap="outerHTML"
+              hx-trigger="submit, keyup changed delay:400ms from:#id_scholarship_name">
             <div class="filter-grid">
                 <div class="filter-field">
                     <label for="id_section">Type</label>
@@ -51,43 +57,7 @@
         </form>
     </section>
 
-    {% if scholarships %}
-        <div class="table-wrapper">
-            <table class="scholarship-table">
-                <thead>
-                    <tr>
-                        <th>Type</th>
-                        <th>Foundation</th>
-                        <th>Scholarship Name</th>
-                        <th>Qualifier</th>
-                        <th>Schools</th>
-                        <th>Fields</th>
-                        <th>Grants</th>
-                        <th>Award</th>
-                        <th>App Period</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for s in scholarships %}
-                        <tr>
-                            <td data-label="Type"><span class="section-badge">{{ s.section|get_section_display }}</span></td>
-                            <td data-label="Foundation">{{ s.foundation_name }}</td>
-                            <td data-label="Scholarship Name"><a href="{% url 'scholarship-detail' s.pk %}">{{ s.scholarship_name }}</a></td>
-                            <td data-label="Qualifier"><div class="text-clamp" id="qualifier-{{ s.pk }}">{{ s.qualifier|expand_qualifier }}</div><button class="clamp-toggle" onclick="toggleClamp('qualifier-{{ s.pk }}')" data-target="qualifier-{{ s.pk }}">Show more</button></td>
-                            <td data-label="Schools"><div class="text-clamp" id="schools-{{ s.pk }}">{{ s.designated_schools }}</div><button class="clamp-toggle" onclick="toggleClamp('schools-{{ s.pk }}')" data-target="schools-{{ s.pk }}">Show more</button></td>
-                            <td data-label="Fields"><div class="text-clamp" id="fields-{{ s.pk }}">{{ s.designated_fields }}</div><button class="clamp-toggle" onclick="toggleClamp('fields-{{ s.pk }}')" data-target="fields-{{ s.pk }}">Show more</button></td>
-                            <td data-label="Grants">{{ s.plural_grants|display_grants }}</td>
-                            <td data-label="Award">{{ s.contents|transform_award_amount }}</td>
-                            <td data-label="App Period"><div class="text-clamp" id="period-{{ s.pk }}">{{ s.application_period }}</div><button class="clamp-toggle" onclick="toggleClamp('period-{{ s.pk }}')" data-target="period-{{ s.pk }}">Show more</button></td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <p class="result-count">{{ scholarships|length }} scholarship{{ scholarships|length|pluralize }} found</p>
-    {% else %}
-        <p>No scholarships found matching your criteria.</p>
-    {% endif %}
+    {% include "scholarships/_scholarship_results.html" %}
 {% endblock %}
 
 {% block extra_js %}
@@ -114,8 +84,7 @@ function toggleClamp(elementId) {
 }
 
 // Initialize show/hide more buttons
-document.addEventListener('DOMContentLoaded', function() {
-    // Handle show/hide more buttons based on content
+function initClampToggles() {
     const clampButtons = document.querySelectorAll('.clamp-toggle');
     clampButtons.forEach(function(button) {
         const targetId = button.getAttribute('data-target');
@@ -135,6 +104,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-});
+}
+
+document.addEventListener('DOMContentLoaded', initClampToggles);
+// Re-run after HTMX swaps in the results region.
+document.body.addEventListener('htmx:afterSettle', initClampToggles);
 </script>
 {% endblock %}

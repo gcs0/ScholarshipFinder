@@ -6,7 +6,8 @@
     <title>{% block title %}ScholarshipFinder{% endblock %}</title>
     {% load static %}
     <script>document.documentElement.classList.add('js');</script>
-    <link rel="stylesheet" href="{% static 'scholarships/style.css' %}?v=20260726">
+    <link rel="stylesheet" href="{% static 'scholarships/style.css' %}?v=20260727">
+    <script src="{% static 'scholarships/vendor/htmx.min.js' %}?v=1.9.12" defer></script>
 </head>
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -25,6 +26,7 @@
                 {% url 'scholarship-list' as list_url %}
                 {% url 'request-form' as request_url %}
                 {% url 'profile' as profile_url %}
+                {% url 'favorites' as favorites_url %}
                 {% url 'login' as login_url %}
                 {% url 'register' as register_url %}
                 {% url 'logout' as logout_url %}
@@ -32,6 +34,7 @@
                     <li><a href="{{ home_url }}" {% if request.path == home_url %}aria-current="page"{% endif %}>Home</a></li>
                     <li><a href="{{ list_url }}" {% if request.path == list_url %}aria-current="page"{% endif %}>Scholarships</a></li>
                     {% if user.is_authenticated %}
+                        <li><a href="{{ favorites_url }}" {% if request.path == favorites_url %}aria-current="page"{% endif %}>Favorites</a></li>
                         <li><a href="{{ request_url }}" {% if request.path == request_url %}aria-current="page"{% endif %}>Suggest a Scholarship</a></li>
                         <li><a href="{{ profile_url }}" {% if request.path == profile_url %}aria-current="page"{% endif %}>Profile</a></li>
                         <li><form method="post" action="{% url 'logout' %}">

@@ -6,10 +6,10 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("scholarships/", views.scholarship_list, name="scholarship-list"),
     path(
-        "scholarships/<int:pk>/",
-        views.scholarship_detail,
-        name="scholarship-detail",
+        "scholarships/<int:pk>/favorite/", views.toggle_favorite, name="toggle-favorite"
     ),
+    path("scholarships/<int:pk>/", views.scholarship_detail, name="scholarship-detail"),
+    path("favorites/", views.favorite_list, name="favorites"),
     path("request/", views.request_form, name="request-form"),
     path("register/", views.register, name="register"),
     path("login/", views.user_login, name="login"),

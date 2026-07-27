@@ -3,108 +3,146 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from django.utils import timezone
 
-from .models import Scholarship, ScholarshipRequest
+from .models import Favorite, Scholarship, ScholarshipRequest
 
 
 class UserAdmin(BaseUserAdmin):
-    list_display = ('username', 'email', 'name', 'is_staff', 'is_superuser')
-    list_filter = ('is_staff', 'is_superuser', 'is_active')
-    search_fields = ('username', 'email', 'name')
+    list_display = ("username", "email", "name", "is_staff", "is_superuser")
+    list_filter = ("is_staff", "is_superuser", "is_active")
+    search_fields = ("username", "email", "name")
 
     fieldsets = BaseUserAdmin.fieldsets + (
-        ('Additional Info', {'fields': ('education', 'discipline', 'prefecture')}),
+        ("Additional Info", {"fields": ("education", "discipline", "prefecture")}),
     )
 
     add_fieldsets = BaseUserAdmin.add_fieldsets + (
-        ('Additional Info', {'fields': ('education', 'discipline', 'prefecture')}),
+        ("Additional Info", {"fields": ("education", "discipline", "prefecture")}),
     )
 
 
 class ScholarshipAdmin(admin.ModelAdmin):
-    list_display = ('scholarship_name', 'foundation_name', 'section', 'imported_at')
-    list_filter = ('section', 'imported_at')
-    search_fields = ('scholarship_name', 'foundation_name', 'designated_schools', 'designated_fields')
-    readonly_fields = ('imported_at',)
+    list_display = ("scholarship_name", "foundation_name", "section", "imported_at")
+    list_filter = ("section", "imported_at")
+    search_fields = (
+        "scholarship_name",
+        "foundation_name",
+        "designated_schools",
+        "designated_fields",
+    )
+    readonly_fields = ("imported_at",)
 
     fieldsets = (
-        ('Basic Information', {
-            'fields': ('section', 'foundation_name', 'scholarship_name')
-        }),
-        ('Contact Information', {
-            'fields': ('address_contact', 'inquiry', 'application')
-        }),
-        ('Eligibility', {
-            'fields': ('qualifier', 'designated_schools', 'designated_fields', 'plural_grants')
-        }),
-        ('Details', {
-            'fields': ('additional_requirements', 'contents', 'duration', 'application_period', 'selection_method')
-        }),
-        ('Statistics', {
-            'fields': ('grantees', 'grantees_applications')
-        }),
-        ('System', {
-            'fields': ('imported_at',)
-        }),
+        (
+            "Basic Information",
+            {"fields": ("section", "foundation_name", "scholarship_name")},
+        ),
+        (
+            "Contact Information",
+            {"fields": ("address_contact", "inquiry", "application")},
+        ),
+        (
+            "Eligibility",
+            {
+                "fields": (
+                    "qualifier",
+                    "designated_schools",
+                    "designated_fields",
+                    "plural_grants",
+                )
+            },
+        ),
+        (
+            "Details",
+            {
+                "fields": (
+                    "additional_requirements",
+                    "contents",
+                    "duration",
+                    "application_period",
+                    "selection_method",
+                )
+            },
+        ),
+        ("Statistics", {"fields": ("grantees", "grantees_applications")}),
+        ("System", {"fields": ("imported_at",)}),
     )
 
 
 class ScholarshipRequestAdmin(admin.ModelAdmin):
     list_display = (
-        'id',
-        'user',
-        'scholarship_name',
-        'provider',
-        'status',
-        'created_at',
-        'reviewed_by',
+        "id",
+        "user",
+        "scholarship_name",
+        "provider",
+        "status",
+        "created_at",
+        "reviewed_by",
     )
-    list_filter = ('status', 'created_at', 'reviewed_date')
-    search_fields = ('user__name', 'user__email', 'scholarship_name', 'provider')
-    readonly_fields = ('created_at', 'updated_at')
+    list_filter = ("status", "created_at", "reviewed_date")
+    search_fields = ("user__name", "user__email", "scholarship_name", "provider")
+    readonly_fields = ("created_at", "updated_at")
 
     fieldsets = (
-        ('Submission Information', {
-            'fields': ('user', 'scholarship_name', 'provider', 'award_amount', 'notes')
-        }),
-        ('Review', {
-            'fields': (
-                'status', 'admin_notes', 'reviewed_by', 'reviewed_date',
-                'created_scholarship',
-            )
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at')
-        }),
+        (
+            "Submission Information",
+            {
+                "fields": (
+                    "user",
+                    "scholarship_name",
+                    "provider",
+                    "award_amount",
+                    "notes",
+                )
+            },
+        ),
+        (
+            "Review",
+            {
+                "fields": (
+                    "status",
+                    "admin_notes",
+                    "reviewed_by",
+                    "reviewed_date",
+                    "created_scholarship",
+                )
+            },
+        ),
+        ("Timestamps", {"fields": ("created_at", "updated_at")}),
     )
 
-    actions = ['approve_requests', 'reject_requests']
+    actions = ["approve_requests", "reject_requests"]
 
     def approve_requests(self, request, queryset):
         for req in queryset:
-            if req.status != 'approved':
+            if req.status != "approved":
                 scholarship = Scholarship.objects.create(
-                    section='IV',
+                    section="IV",
                     foundation_name=req.provider,
                     scholarship_name=req.scholarship_name,
                     contents=req.award_amount,
                 )
                 req.created_scholarship = scholarship
-                req.status = 'approved'
+                req.status = "approved"
                 req.reviewed_by = request.user
                 req.reviewed_date = timezone.now()
-                req.save(update_fields=[
-                    'created_scholarship', 'status', 'reviewed_by', 'reviewed_date',
-                ])
-        self.message_user(request, 'Selected requests successfully approved.')
+                req.save(
+                    update_fields=[
+                        "created_scholarship",
+                        "status",
+                        "reviewed_by",
+                        "reviewed_date",
+                    ]
+                )
+        self.message_user(request, "Selected requests successfully approved.")
+
     approve_requests.short_description = "Approve selected requests"
 
     def reject_requests(self, request, queryset):
         updated = queryset.update(
-            status='rejected',
-            reviewed_by=request.user,
-            reviewed_date=timezone.now(),
+            status="rejected", reviewed_by=request.user, reviewed_date=timezone.now()
         )
-        self.message_user(request, f'{updated} requests successfully rejected.')
+        self.message_user(request, f"{updated} requests successfully rejected.")
+
     reject_requests.short_description = "Reject selected requests"
 
 
@@ -119,3 +157,18 @@ admin.site.register(User, UserAdmin)
 # Register our models
 admin.site.register(Scholarship, ScholarshipAdmin)
 admin.site.register(ScholarshipRequest, ScholarshipRequestAdmin)
+
+
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "scholarship", "created_at")
+    list_filter = ("created_at",)
+    search_fields = (
+        "user__name",
+        "user__email",
+        "scholarship__scholarship_name",
+        "scholarship__foundation_name",
+    )
+    readonly_fields = ("created_at",)
+
+
+admin.site.register(Favorite, FavoriteAdmin)
